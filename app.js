@@ -131,6 +131,21 @@ const lunchOptions = [
     "かにかま": "1パック",
     "ごはん": "3合",
     "中華スープの素": "1袋"
+  }),
+  createMeal("焼売ランチ", "既製品", ["焼売", "ごはん"], {
+    "焼売": "1袋",
+    "ごはん": "3合",
+    "ブロッコリー": "1株"
+  }),
+  createMeal("ミートボールランチ", "既製品", ["ミートボール", "ごはん"], {
+    "ミートボール": "1袋",
+    "ごはん": "3合",
+    "卵": "3個"
+  }),
+  createMeal("ミニグラタンランチ", "既製品", ["ミニグラタン", "ごはん"], {
+    "ミニグラタン": "1袋",
+    "ごはん": "3合",
+    "ミニトマト": "8個"
   })
 ];
 
@@ -220,6 +235,21 @@ const dinnerOptions = [
   createMeal("塩さば定食", "魚", ["塩さば"], {
     "塩さば": "2切れ",
     "大根": "0.5本"
+  }),
+  createMeal("エビ寄せフライ定食", "既製品", ["エビ寄せフライ"], {
+    "エビ寄せフライ": "1袋",
+    "ごはん": "2合",
+    "キャベツ": "0.5玉"
+  }),
+  createMeal("春巻き定食", "既製品", ["春巻き"], {
+    "春巻き": "1袋",
+    "ごはん": "2合",
+    "レタス": "1玉"
+  }),
+  createMeal("コロッケ定食", "既製品", ["コロッケ"], {
+    "コロッケ": "1袋",
+    "ごはん": "2合",
+    "キャベツ": "0.5玉"
   })
 ];
 
@@ -289,7 +319,10 @@ const sideOptions = {
     createSide("春雨サラダ", { "春雨": "1袋", "きゅうり": "2本" }),
     createSide("ちくわ磯辺焼き", { "ちくわ": "1袋" }),
     createSide("ポテトサラダ", { "じゃがいも": "3個", "きゅうり": "2本" }),
-    createSide("ブロッコリーサラダ", { "ブロッコリー": "1株" })
+    createSide("ブロッコリーサラダ", { "ブロッコリー": "1株" }),
+    createSide("ポテサラ", { "ポテトサラダ惣菜": "1パック" }),
+    createSide("マカロニサラダ惣菜", { "マカロニサラダ惣菜": "1パック" }),
+    createSide("きんぴらごぼう惣菜", { "きんぴらごぼう惣菜": "1パック" })
   ],
   lunchSoup: [
     createSide("味噌汁", { "味噌": "1パック", "豆腐": "1丁" }),
@@ -307,6 +340,7 @@ const sideOptions = {
   ],
   dinner: [
     createSide("ポテトサラダ", { "じゃがいも": "3個", "きゅうり": "2本" }),
+    createSide("ポテサラ", { "ポテトサラダ惣菜": "1パック" }),
     createSide("千切りキャベツ", { "キャベツ": "0.5玉" }),
     createSide("ひじき煮", { "ひじき": "1袋", "にんじん": "1本", "油揚げ": "1パック" }),
     createSide("もやしナムル", { "もやし": "1袋" }),
@@ -314,10 +348,14 @@ const sideOptions = {
     createSide("冷ややっこ", { "豆腐": "1丁" }),
     createSide("ほうれん草のごま和え", { "ほうれん草": "1束", "すりごま": "1袋" }),
     createSide("きんぴらごぼう", { "ごぼう": "1本", "にんじん": "1本" }),
+    createSide("きんぴらごぼう惣菜", { "きんぴらごぼう惣菜": "1パック" }),
     createSide("ツナサラダ", { "ツナ缶": "1缶", "レタス": "1玉" }),
     createSide("マカロニサラダ", { "マカロニ": "1袋", "きゅうり": "2本", "ハム": "1パック" }),
+    createSide("マカロニサラダ惣菜", { "マカロニサラダ惣菜": "1パック" }),
     createSide("切り干し大根", { "切り干し大根": "1袋", "にんじん": "1本", "油揚げ": "1パック" }),
-    createSide("白菜の浅漬け", { "白菜": "0.5玉" })
+    createSide("白菜の浅漬け", { "白菜": "0.5玉" }),
+    createSide("鮭フレーク", { "鮭フレークパック": "1パック" }),
+    createSide("そぼろ瓶", { "鶏そぼろ瓶": "1瓶" })
   ],
   dinnerSoup: [
     createSide("豆腐の味噌汁", { "味噌": "1パック", "豆腐": "1丁" }),
@@ -429,6 +467,7 @@ quantityNormalizationGuide = {
 ingredientPriceGuide = {
   "ごはん": { unit: "合", pricePerUnit: 90 },
   "鮭フレーク": { unit: "g", pricePerUnit: 5 },
+  "鮭フレークパック": { unit: "パック", pricePerUnit: 637 },
   "食パン": { unit: "枚", pricePerUnit: 36.7 },
   "卵": { unit: "個", pricePerUnit: 35 },
   "バター": { unit: "g", pricePerUnit: 2.25 },
@@ -503,12 +542,21 @@ ingredientPriceGuide = {
   "ツナ缶": { unit: "g", pricePerUnit: 2.29 },
   "マカロニ": { unit: "g", pricePerUnit: 0.9 },
   "切り干し大根": { unit: "g", pricePerUnit: 4.5 },
-  "なめこ": { unit: "g", pricePerUnit: 1.2 }
-  ,
+  "なめこ": { unit: "g", pricePerUnit: 1.2 },
   "片栗粉": { unit: "g", pricePerUnit: 0.5 },
   "焼きのり": { unit: "枚", pricePerUnit: 18 },
   "いんげん": { unit: "g", pricePerUnit: 1.8 },
-  "ミニトマト": { unit: "個", pricePerUnit: 25 }
+  "ミニトマト": { unit: "個", pricePerUnit: 25 },
+  "エビ寄せフライ": { unit: "袋", pricePerUnit: 321 },
+  "焼売": { unit: "袋", pricePerUnit: 975 },
+  "ミートボール": { unit: "袋", pricePerUnit: 167 },
+  "ポテトサラダ惣菜": { unit: "パック", pricePerUnit: 297 },
+  "マカロニサラダ惣菜": { unit: "パック", pricePerUnit: 181 },
+  "きんぴらごぼう惣菜": { unit: "パック", pricePerUnit: 181 },
+  "鶏そぼろ瓶": { unit: "瓶", pricePerUnit: 464 },
+  "ミニグラタン": { unit: "袋", pricePerUnit: 742 },
+  "春巻き": { unit: "袋", pricePerUnit: 651 },
+  "コロッケ": { unit: "袋", pricePerUnit: 1030 }
 };
 
 if (typeof document !== "undefined") {
@@ -525,12 +573,21 @@ if (typeof document !== "undefined") {
       const adultCount = Math.max(0, Number(document.getElementById("adult-count").value) || 0);
       const tomariName = document.getElementById("bento-name-tomari").value.trim() || "とまりのお弁当";
       const sosodoName = document.getElementById("bento-name-sosodo").value.trim() || "そそどのお弁当";
+      const tomariPrice = Math.max(0, Number(document.getElementById("bento-price-tomari").value) || 0);
+      const sosodoPrice = Math.max(0, Number(document.getElementById("bento-price-sosodo").value) || 0);
       const manualBentoDaysInput = document.getElementById("manual-bento-days").value;
       const manualBentoName = document.getElementById("manual-bento-name").value.trim() || "持っていくお弁当";
       renderPlan(
         year,
         month,
-        { tomari: tomariName, sosodo: sosodoName },
+        {
+          tomari: tomariName,
+          sosodo: sosodoName,
+          prices: {
+            [tomariName]: tomariPrice,
+            [sosodoName]: sosodoPrice
+          }
+        },
         kidsCount,
         adultCount,
         {
@@ -550,7 +607,11 @@ if (typeof document !== "undefined") {
 
     renderPlan(today.getFullYear(), today.getMonth() + 1, {
       tomari: "とまりのお弁当",
-      sosodo: "そそどのお弁当"
+      sosodo: "そそどのお弁当",
+      prices: {
+        "とまりのお弁当": 500,
+        "そそどのお弁当": 500
+      }
     }, 2, 1, {
       days: [],
       name: "持っていくお弁当"
@@ -651,12 +712,20 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
       addIngredients(currentWeek.ingredients, lunch.ingredients);
       addEstimatedCost(currentWeek, lunch.estimatedCost, lunch.estimatedItemCount);
     } else if (manualBentoDays.has(day)) {
+      const firstBentoSide = pickComponent(sideOptions.bento, usage.bentoSide, meals, []);
+      const secondBentoSide = pickComponent(
+        sideOptions.bento,
+        usage.bentoSide,
+        meals.concat({ name: firstBentoSide.name, dishes: [firstBentoSide.name] }),
+        []
+      );
       const manualBento = composePackedMeal(
         renameMeal(
           pickMeal(bentoOptions, usage.bento, meals, previousDayType, "", []),
           manualBentoName
         ),
-        pickComponent(sideOptions.bento, usage.bentoSide, meals, []),
+        firstBentoSide,
+        secondBentoSide,
         kidsCount,
         adultCount
       );
@@ -670,7 +739,7 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
       const bentoName = pickBentoName(date, bentoNames);
       dinner = {
         ...createMeal(bentoName, "購入するごはん", ["お弁当", "付け合わせ", "汁物はなし"], {}),
-        estimatedCost: estimateBentoCost(kidsCount, adultCount),
+        estimatedCost: estimateBentoCost(bentoName, bentoNames),
         estimatedItemCount: 1
       };
     } else {
@@ -726,16 +795,16 @@ function composeMeal(mainMeal, sideDish, soupDish, kidsCount, adultCount) {
   };
 }
 
-function composePackedMeal(mainMeal, sideDish, kidsCount, adultCount) {
+function composePackedMeal(mainMeal, sideDish, extraSideDish, kidsCount, adultCount) {
   const ingredients = scaleIngredientMap(
-    mergeIngredientMaps(mainMeal.ingredients, sideDish.ingredients),
+    mergeIngredientMaps(mainMeal.ingredients, sideDish.ingredients, extraSideDish.ingredients),
     kidsCount,
     adultCount
   );
   const estimate = estimateIngredientMapCost(ingredients);
   return {
     ...mainMeal,
-    dishes: [...mainMeal.dishes, sideDish.name],
+    dishes: [...mainMeal.dishes, sideDish.name, extraSideDish.name],
     ingredients,
     estimatedCost: estimate.total,
     estimatedItemCount: estimate.count
@@ -983,8 +1052,11 @@ function estimateIngredientCost(name, quantity) {
   };
 }
 
-function estimateBentoCost(kidsCount, adultCount) {
-  return (kidsCount * 500) + (adultCount * 700);
+function estimateBentoCost(bentoName, bentoNames) {
+  if (bentoNames && bentoNames.prices && Number.isFinite(bentoNames.prices[bentoName])) {
+    return bentoNames.prices[bentoName];
+  }
+  return 500;
 }
 
 function parseManualBentoDays(input, year, month) {
@@ -1040,6 +1112,10 @@ function renderSummary(plan, bentoNames, manualBentoConfig) {
   const bentoCount = plan.days.filter((day) => day.meals.some((meal) =>
     meal.name === bentoNames.tomari || meal.name === bentoNames.sosodo
   )).length;
+  const tomariCount = plan.days.filter((day) => day.meals.some((meal) => meal.name === bentoNames.tomari)).length;
+  const sosodoCount = plan.days.filter((day) => day.meals.some((meal) => meal.name === bentoNames.sosodo)).length;
+  const tomariCost = (bentoNames.prices?.[bentoNames.tomari] || 0) * tomariCount;
+  const sosodoCost = (bentoNames.prices?.[bentoNames.sosodo] || 0) * sosodoCount;
   const manualBentoCount = plan.days.filter((day) => day.meals.some((meal) =>
     meal.name === (manualBentoConfig.name || "持っていくお弁当")
   )).length;
@@ -1052,7 +1128,7 @@ function renderSummary(plan, bentoNames, manualBentoConfig) {
   }[plan.season];
 
   document.getElementById("summary-text").textContent =
-    `${plan.year}年${plan.month}月は 子ども${plan.kidsCount}人・大人${plan.adultCount}人の${seasonLabel}向けで ${plan.days.length}日分の献立を作成しました。土日 ${weekends}日、${bentoNames.tomari} / ${bentoNames.sosodo} は合計 ${bentoCount}回、指定したお弁当日は ${manualBentoCount}日、月の食費目安は ${formatCurrency(monthlyEstimate)} です。`;
+    `${plan.year}年${plan.month}月は 子ども${plan.kidsCount}人・大人${plan.adultCount}人の${seasonLabel}向けで ${plan.days.length}日分の献立を作成しました。土日 ${weekends}日、${bentoNames.tomari} は ${tomariCount}回で ${formatCurrency(tomariCost)}、${bentoNames.sosodo} は ${sosodoCount}回で ${formatCurrency(sosodoCost)}、購入弁当は合計 ${bentoCount}回、指定したお弁当日は ${manualBentoCount}日、月の食費目安は ${formatCurrency(monthlyEstimate)} です。`;
 }
 
 function renderMonthlyMenu(days) {
