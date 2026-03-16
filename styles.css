@@ -153,6 +153,13 @@ h1 {
   margin-bottom: 14px;
 }
 
+.print-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
 .monthly-menu {
   display: grid;
   gap: 14px;
@@ -320,6 +327,15 @@ h1 {
     justify-items: stretch;
   }
 
+  .print-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .print-actions .print-button {
+    flex: 1 1 auto;
+  }
+
   .week-cost {
     width: 100%;
     text-align: left;
@@ -334,10 +350,6 @@ h1 {
   .hero,
   .summary,
   .print-button {
-    display: none !important;
-  }
-
-  .week-print-button {
     display: none !important;
   }
 

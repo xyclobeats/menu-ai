@@ -605,6 +605,10 @@ if (typeof document !== "undefined") {
       printSection("shopping");
     });
 
+    document.getElementById("print-all").addEventListener("click", () => {
+      printSection("all");
+    });
+
     renderPlan(today.getFullYear(), today.getMonth() + 1, {
       tomari: "とまりのお弁当",
       sosodo: "そそどのお弁当",
@@ -766,6 +770,7 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
       day,
       weekday,
       isWeekend,
+      weekLabel: currentWeek.label,
       meals
     });
 
@@ -1148,7 +1153,7 @@ function renderMonthlyMenu(days) {
     `).join("");
 
     root.insertAdjacentHTML("beforeend", `
-      <article class="day-card ${day.isWeekend ? "weekend" : ""}">
+      <article class="day-card ${day.isWeekend ? "weekend" : ""}" data-week-label="${day.weekLabel}">
         <div class="day-head">
           <div class="day-title">${day.day}日 (${weekdayNames[day.weekday]})</div>
           <div class="tag">${day.isWeekend ? "土日3食" : "平日2食"}</div>
@@ -1186,6 +1191,8 @@ function renderWeeklyShopping(weeks) {
               <div class="week-cost-value">${formatCurrency(week.estimatedCost)}</div>
             </div>
             <button type="button" class="print-button week-print-button" data-week-label="${week.label}">この週を印刷</button>
+            <button type="button" class="print-button week-menu-print-button" data-week-label="${week.label}">この週のメニュー</button>
+            <button type="button" class="print-button week-shopping-print-button" data-week-label="${week.label}">この週の買い物</button>
           </div>
         </div>
         <div class="week-cost-note">単価を設定できた ${week.estimatedItemCount} 品目からの概算です。地域や時期で前後します。</div>
@@ -1196,7 +1203,19 @@ function renderWeeklyShopping(weeks) {
 
   root.querySelectorAll(".week-print-button").forEach((button) => {
     button.addEventListener("click", () => {
-      printWeek(button.dataset.weekLabel);
+      printWeek(button.dataset.weekLabel, "both");
+    });
+  });
+
+  root.querySelectorAll(".week-menu-print-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      printWeek(button.dataset.weekLabel, "menu");
+    });
+  });
+
+  root.querySelectorAll(".week-shopping-print-button").forEach((button) => {
+    button.addEventListener("click", () => {
+      printWeek(button.dataset.weekLabel, "shopping");
     });
   });
 }
@@ -1231,9 +1250,13 @@ function shouldInsertMonthlySpecial(day, daysInMonth, existingDays, specialMealN
 function printSection(section) {
   const monthlyPanel = document.querySelector("#monthly-menu").closest(".panel");
   const shoppingPanel = document.querySelector("#weekly-shopping").closest(".panel");
+  const dayCards = Array.from(document.querySelectorAll("#monthly-menu .day-card"));
+  const weekCards = Array.from(document.querySelectorAll("#weekly-shopping .week-card"));
 
-  monthlyPanel.classList.toggle("print-hidden", section !== "menu");
-  shoppingPanel.classList.toggle("print-hidden", section !== "shopping");
+  monthlyPanel.classList.toggle("print-hidden", section === "shopping");
+  shoppingPanel.classList.toggle("print-hidden", section === "menu");
+  dayCards.forEach((card) => card.classList.remove("print-hidden"));
+  weekCards.forEach((card) => card.classList.remove("print-hidden"));
 
   window.print();
 
@@ -1241,13 +1264,18 @@ function printSection(section) {
   shoppingPanel.classList.remove("print-hidden");
 }
 
-function printWeek(weekLabel) {
+function printWeek(weekLabel, mode = "both") {
   const monthlyPanel = document.querySelector("#monthly-menu").closest(".panel");
   const shoppingPanel = document.querySelector("#weekly-shopping").closest(".panel");
+  const dayCards = Array.from(document.querySelectorAll("#monthly-menu .day-card"));
   const weekCards = Array.from(document.querySelectorAll("#weekly-shopping .week-card"));
 
-  monthlyPanel.classList.add("print-hidden");
-  shoppingPanel.classList.remove("print-hidden");
+  monthlyPanel.classList.toggle("print-hidden", mode === "shopping");
+  shoppingPanel.classList.toggle("print-hidden", mode === "menu");
+
+  dayCards.forEach((card) => {
+    card.classList.toggle("print-hidden", card.dataset.weekLabel !== weekLabel);
+  });
 
   weekCards.forEach((card) => {
     card.classList.toggle("print-hidden", card.dataset.weekLabel !== weekLabel);
@@ -1256,6 +1284,9 @@ function printWeek(weekLabel) {
   window.print();
 
   monthlyPanel.classList.remove("print-hidden");
+  dayCards.forEach((card) => {
+    card.classList.remove("print-hidden");
+  });
   weekCards.forEach((card) => {
     card.classList.remove("print-hidden");
   });
