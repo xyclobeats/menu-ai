@@ -39,6 +39,14 @@
           お弁当名2
           <input id="bento-name-sosodo" type="text" value="そそどのお弁当" required>
         </label>
+        <label>
+          お弁当の日
+          <input id="manual-bento-days" type="text" placeholder="例: 5, 12, 21（平日のみ）">
+        </label>
+        <label>
+          追加するお弁当名
+          <input id="manual-bento-name" type="text" value="持っていくお弁当">
+        </label>
         <button type="submit">献立を作る</button>
       </form>
     </section>
@@ -50,6 +58,7 @@
           <li>平日: 朝ごはん、夕ごはん</li>
           <li>土日: 朝ごはん、昼ごはん、夕ごはん</li>
           <li>土曜か日曜の夕ごはんに週1回、「とまり」か「そそど」のお弁当を入れる</li>
+          <li>指定した平日は「お弁当の日」として反映できる</li>
           <li>1週間ごとに必要食材を集計する</li>
           <li>週ごとの買い物金額の目安も表示する</li>
         </ul>

@@ -223,6 +223,48 @@ const dinnerOptions = [
   })
 ];
 
+const bentoOptions = [
+  createMeal("唐揚げ弁当", "定番弁当", ["唐揚げ", "ごはん"], {
+    "鶏もも肉": "250g",
+    "片栗粉": "80g",
+    "ごはん": "2合",
+    "ブロッコリー": "1株"
+  }),
+  createMeal("鮭のり弁", "魚弁当", ["焼き鮭", "のりごはん"], {
+    "鮭": "2切れ",
+    "ごはん": "2合",
+    "焼きのり": "4枚",
+    "ちくわ": "1袋"
+  }),
+  createMeal("そぼろ弁当", "丼弁当", ["鶏そぼろ", "炒り卵ごはん"], {
+    "鶏ひき肉": "250g",
+    "卵": "3個",
+    "ごはん": "2合",
+    "いんげん": "1袋"
+  }),
+  createMeal("ハンバーグ弁当", "洋風弁当", ["ハンバーグ", "ごはん"], {
+    "合いびき肉": "250g",
+    "玉ねぎ": "1個",
+    "パン粉": "80g",
+    "卵": "1個",
+    "ごはん": "2合"
+  }),
+  createMeal("生姜焼き弁当", "肉弁当", ["豚の生姜焼き", "ごはん"], {
+    "豚ロース": "250g",
+    "玉ねぎ": "1個",
+    "しょうが": "1個",
+    "ごはん": "2合",
+    "レタス": "1玉"
+  }),
+  createMeal("オムライス弁当", "洋食弁当", ["オムライス"], {
+    "ごはん": "2合",
+    "卵": "3個",
+    "鶏もも肉": "180g",
+    "玉ねぎ": "1個",
+    "ケチャップ": "120g"
+  })
+];
+
 const sideOptions = {
   breakfast: [
     createSide("ほうれん草のおひたし", { "ほうれん草": "1束" }),
@@ -254,6 +296,14 @@ const sideOptions = {
     createSide("わかめスープ", { "わかめ": "1袋", "中華スープの素": "1袋" }),
     createSide("中華スープ", { "中華スープの素": "1袋", "卵": "2個" }),
     createSide("コンソメスープ", { "コンソメ": "1箱", "玉ねぎ": "1個" })
+  ],
+  bento: [
+    createSide("ブロッコリーのおかか和え", { "ブロッコリー": "1株" }),
+    createSide("きんぴらごぼう", { "ごぼう": "1本", "にんじん": "1本" }),
+    createSide("卵焼き", { "卵": "2個" }),
+    createSide("ポテトサラダ", { "じゃがいも": "3個", "きゅうり": "2本" }),
+    createSide("ほうれん草のごま和え", { "ほうれん草": "1束", "すりごま": "1袋" }),
+    createSide("ミニトマト", { "ミニトマト": "8個" })
   ],
   dinner: [
     createSide("ポテトサラダ", { "じゃがいも": "3個", "きゅうり": "2本" }),
@@ -373,7 +423,8 @@ quantityNormalizationGuide = {
   "ツナ缶": { fromUnit: "缶", toUnit: "g", multiplier: 70 },
   "マカロニ": { fromUnit: "袋", toUnit: "g", multiplier: 200 },
   "切り干し大根": { fromUnit: "袋", toUnit: "g", multiplier: 40 },
-  "なめこ": { fromUnit: "袋", toUnit: "g", multiplier: 100 }
+  "なめこ": { fromUnit: "袋", toUnit: "g", multiplier: 100 },
+  "いんげん": { fromUnit: "袋", toUnit: "g", multiplier: 100 }
 };
 ingredientPriceGuide = {
   "ごはん": { unit: "合", pricePerUnit: 90 },
@@ -453,6 +504,11 @@ ingredientPriceGuide = {
   "マカロニ": { unit: "g", pricePerUnit: 0.9 },
   "切り干し大根": { unit: "g", pricePerUnit: 4.5 },
   "なめこ": { unit: "g", pricePerUnit: 1.2 }
+  ,
+  "片栗粉": { unit: "g", pricePerUnit: 0.5 },
+  "焼きのり": { unit: "枚", pricePerUnit: 18 },
+  "いんげん": { unit: "g", pricePerUnit: 1.8 },
+  "ミニトマト": { unit: "個", pricePerUnit: 25 }
 };
 
 if (typeof document !== "undefined") {
@@ -469,7 +525,19 @@ if (typeof document !== "undefined") {
       const adultCount = Math.max(0, Number(document.getElementById("adult-count").value) || 0);
       const tomariName = document.getElementById("bento-name-tomari").value.trim() || "とまりのお弁当";
       const sosodoName = document.getElementById("bento-name-sosodo").value.trim() || "そそどのお弁当";
-      renderPlan(year, month, { tomari: tomariName, sosodo: sosodoName }, kidsCount, adultCount);
+      const manualBentoDaysInput = document.getElementById("manual-bento-days").value;
+      const manualBentoName = document.getElementById("manual-bento-name").value.trim() || "持っていくお弁当";
+      renderPlan(
+        year,
+        month,
+        { tomari: tomariName, sosodo: sosodoName },
+        kidsCount,
+        adultCount,
+        {
+          days: parseManualBentoDays(manualBentoDaysInput, year, month),
+          name: manualBentoName
+        }
+      );
     });
 
     document.getElementById("print-menu").addEventListener("click", () => {
@@ -483,7 +551,10 @@ if (typeof document !== "undefined") {
     renderPlan(today.getFullYear(), today.getMonth() + 1, {
       tomari: "とまりのお弁当",
       sosodo: "そそどのお弁当"
-    }, 2, 1);
+    }, 2, 1, {
+      days: [],
+      name: "持っていくお弁当"
+    });
   });
 }
 
@@ -495,28 +566,34 @@ function createSide(name, ingredients) {
   return { name, ingredients: normalizeIngredientMap(ingredients) };
 }
 
-function renderPlan(year, month, bentoNames, kidsCount, adultCount) {
-  const plan = generateMonthlyPlan(year, month, bentoNames, kidsCount, adultCount);
-  renderSummary(plan, bentoNames);
+function renderPlan(year, month, bentoNames, kidsCount, adultCount, manualBentoConfig = { days: [], name: "持っていくお弁当" }) {
+  const plan = generateMonthlyPlan(year, month, bentoNames, kidsCount, adultCount, manualBentoConfig);
+  renderSummary(plan, bentoNames, manualBentoConfig);
   renderMonthlyMenu(plan.days);
   renderWeeklyShopping(plan.weeks);
 }
 
-function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount = 1) {
+function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount = 1, manualBentoConfig = { days: [], name: "持っていくお弁当" }) {
   const daysInMonth = new Date(year, month, 0).getDate();
   const days = [];
   const weeks = [];
   const season = getSeason(month);
   const seasonPref = seasonalPreferences[season];
+  const manualBentoDays = new Set(
+    (manualBentoConfig.days || []).filter((day) => isManualBentoWeekday(year, month, day, daysInMonth))
+  );
+  const manualBentoName = manualBentoConfig.name || "持っていくお弁当";
   const specialMonthlyMeal = pickMonthlySpecial(year, month);
   const usage = {
     breakfast: new Map(),
     lunch: new Map(),
     dinner: new Map(),
+    bento: new Map(),
     breakfastSide: new Map(),
     breakfastSoup: new Map(),
     lunchSide: new Map(),
     lunchSoup: new Map(),
+    bentoSide: new Map(),
     dinnerSide: new Map(),
     dinnerSoup: new Map()
   };
@@ -555,14 +632,16 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
     addEstimatedCost(currentWeek, breakfast.estimatedCost, breakfast.estimatedItemCount);
 
     if (isWeekend) {
-      const lunchMain = shouldInsertMonthlySpecial(day, daysInMonth, days, specialMonthlyMeal, "lunch")
-        ? lunchOptions.find((meal) => meal.name === specialMonthlyMeal)
-        : pickMeal(lunchOptions, usage.lunch, meals, previousDayType, "lunch", seasonPref.lunch);
-      if (lunchMain.name === specialMonthlyMeal) {
-        usage.lunch.set(lunchMain.name, (usage.lunch.get(lunchMain.name) || 0) + 1);
-      }
       const lunch = composeMeal(
-        lunchMain,
+        (() => {
+          const lunchMain = shouldInsertMonthlySpecial(day, daysInMonth, days, specialMonthlyMeal, "lunch")
+            ? lunchOptions.find((meal) => meal.name === specialMonthlyMeal)
+            : pickMeal(lunchOptions, usage.lunch, meals, previousDayType, "lunch", seasonPref.lunch);
+          if (lunchMain.name === specialMonthlyMeal) {
+            usage.lunch.set(lunchMain.name, (usage.lunch.get(lunchMain.name) || 0) + 1);
+          }
+          return lunchMain;
+        })(),
         pickComponent(sideOptions.lunch, usage.lunchSide, meals, seasonPref.lunchSide),
         pickComponent(sideOptions.lunchSoup, usage.lunchSoup, meals, seasonPref.lunchSoup),
         kidsCount,
@@ -571,6 +650,19 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
       meals.push({ slot: "昼", ...lunch });
       addIngredients(currentWeek.ingredients, lunch.ingredients);
       addEstimatedCost(currentWeek, lunch.estimatedCost, lunch.estimatedItemCount);
+    } else if (manualBentoDays.has(day)) {
+      const manualBento = composePackedMeal(
+        renameMeal(
+          pickMeal(bentoOptions, usage.bento, meals, previousDayType, "", []),
+          manualBentoName
+        ),
+        pickComponent(sideOptions.bento, usage.bentoSide, meals, []),
+        kidsCount,
+        adultCount
+      );
+      meals.push({ slot: "弁当", ...manualBento });
+      addIngredients(currentWeek.ingredients, manualBento.ingredients);
+      addEstimatedCost(currentWeek, manualBento.estimatedCost, manualBento.estimatedItemCount);
     }
 
     let dinner;
@@ -615,7 +707,7 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
     week.range = `${week.start}日 - ${week.end}日`;
   });
 
-  return { year, month, season, kidsCount, adultCount, days, weeks };
+  return { year, month, season, kidsCount, adultCount, days, weeks, manualBentoDays: [...manualBentoDays], manualBentoName };
 }
 
 function composeMeal(mainMeal, sideDish, soupDish, kidsCount, adultCount) {
@@ -628,6 +720,22 @@ function composeMeal(mainMeal, sideDish, soupDish, kidsCount, adultCount) {
   return {
     ...mainMeal,
     dishes: [mainMeal.dishes[0], sideDish.name, soupDish.name],
+    ingredients,
+    estimatedCost: estimate.total,
+    estimatedItemCount: estimate.count
+  };
+}
+
+function composePackedMeal(mainMeal, sideDish, kidsCount, adultCount) {
+  const ingredients = scaleIngredientMap(
+    mergeIngredientMaps(mainMeal.ingredients, sideDish.ingredients),
+    kidsCount,
+    adultCount
+  );
+  const estimate = estimateIngredientMapCost(ingredients);
+  return {
+    ...mainMeal,
+    dishes: [...mainMeal.dishes, sideDish.name],
     ingredients,
     estimatedCost: estimate.total,
     estimatedItemCount: estimate.count
@@ -879,6 +987,37 @@ function estimateBentoCost(kidsCount, adultCount) {
   return (kidsCount * 500) + (adultCount * 700);
 }
 
+function parseManualBentoDays(input, year, month) {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  return [...new Set(
+    String(input || "")
+      .split(/[,\s、]+/)
+      .map((value) => Number(value.trim()))
+      .filter((value) => isManualBentoWeekday(year, month, value, daysInMonth))
+  )].sort((a, b) => a - b);
+}
+
+function isManualBentoWeekday(year, month, day, daysInMonth = new Date(year, month, 0).getDate()) {
+  if (!Number.isInteger(day) || day < 1 || day > daysInMonth) {
+    return false;
+  }
+
+  const weekday = new Date(year, month - 1, day).getDay();
+  return weekday !== 0 && weekday !== 6;
+}
+
+function createManualBentoMeal(name, kidsCount, adultCount) {
+  return createMeal(name, "持参するお弁当", ["お弁当を準備"], {});
+}
+
+function renameMeal(meal, name) {
+  return {
+    ...meal,
+    name,
+    note: `${meal.note} / 持参するお弁当`
+  };
+}
+
 function formatCurrency(value) {
   return `約${Math.round(value).toLocaleString("ja-JP")}円`;
 }
@@ -896,10 +1035,13 @@ function getSeason(month) {
   return "winter";
 }
 
-function renderSummary(plan, bentoNames) {
+function renderSummary(plan, bentoNames, manualBentoConfig) {
   const weekends = plan.days.filter((day) => day.isWeekend).length;
   const bentoCount = plan.days.filter((day) => day.meals.some((meal) =>
     meal.name === bentoNames.tomari || meal.name === bentoNames.sosodo
+  )).length;
+  const manualBentoCount = plan.days.filter((day) => day.meals.some((meal) =>
+    meal.name === (manualBentoConfig.name || "持っていくお弁当")
   )).length;
   const monthlyEstimate = plan.weeks.reduce((total, week) => total + week.estimatedCost, 0);
   const seasonLabel = {
@@ -910,7 +1052,7 @@ function renderSummary(plan, bentoNames) {
   }[plan.season];
 
   document.getElementById("summary-text").textContent =
-    `${plan.year}年${plan.month}月は 子ども${plan.kidsCount}人・大人${plan.adultCount}人の${seasonLabel}向けで ${plan.days.length}日分の献立を作成しました。土日 ${weekends}日、${bentoNames.tomari} / ${bentoNames.sosodo} は合計 ${bentoCount}回、月の食費目安は ${formatCurrency(monthlyEstimate)} です。`;
+    `${plan.year}年${plan.month}月は 子ども${plan.kidsCount}人・大人${plan.adultCount}人の${seasonLabel}向けで ${plan.days.length}日分の献立を作成しました。土日 ${weekends}日、${bentoNames.tomari} / ${bentoNames.sosodo} は合計 ${bentoCount}回、指定したお弁当日は ${manualBentoCount}日、月の食費目安は ${formatCurrency(monthlyEstimate)} です。`;
 }
 
 function renderMonthlyMenu(days) {
@@ -1049,6 +1191,7 @@ if (typeof module !== "undefined") {
     mergeQuantity,
     shouldUseBento,
     estimateIngredientCost,
-    estimateBentoCost
+    estimateBentoCost,
+    parseManualBentoDays
   };
 }
