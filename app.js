@@ -597,14 +597,6 @@ if (typeof document !== "undefined") {
       );
     });
 
-    document.getElementById("print-menu").addEventListener("click", () => {
-      printSection("menu");
-    });
-
-    document.getElementById("print-shopping").addEventListener("click", () => {
-      printSection("shopping");
-    });
-
     document.getElementById("print-all").addEventListener("click", () => {
       printSection("all");
     });
@@ -636,6 +628,7 @@ function renderPlan(year, month, bentoNames, kidsCount, adultCount, manualBentoC
   renderSummary(plan, bentoNames, manualBentoConfig);
   renderMonthlyMenu(plan.days);
   renderWeeklyShopping(plan.weeks);
+  renderWeeklyPrintPages(plan);
 }
 
 function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount = 1, manualBentoConfig = { days: [], name: "持っていくお弁当" }) {
@@ -1190,8 +1183,6 @@ function renderWeeklyShopping(weeks) {
               <div class="week-cost-label">買い物の目安</div>
               <div class="week-cost-value">${formatCurrency(week.estimatedCost)}</div>
             </div>
-            <button type="button" class="print-button week-print-button" data-week-label="${week.label}">この週を印刷</button>
-            <button type="button" class="print-button week-menu-print-button" data-week-label="${week.label}">この週のメニュー</button>
             <button type="button" class="print-button week-shopping-print-button" data-week-label="${week.label}">この週の買い物</button>
           </div>
         </div>
@@ -1201,23 +1192,66 @@ function renderWeeklyShopping(weeks) {
     `);
   });
 
-  root.querySelectorAll(".week-print-button").forEach((button) => {
-    button.addEventListener("click", () => {
-      printWeek(button.dataset.weekLabel, "both");
-    });
-  });
-
-  root.querySelectorAll(".week-menu-print-button").forEach((button) => {
-    button.addEventListener("click", () => {
-      printWeek(button.dataset.weekLabel, "menu");
-    });
-  });
-
   root.querySelectorAll(".week-shopping-print-button").forEach((button) => {
     button.addEventListener("click", () => {
-      printWeek(button.dataset.weekLabel, "shopping");
+      printShoppingWeek(button.dataset.weekLabel);
     });
   });
+}
+
+function renderWeeklyPrintPages(plan) {
+  const root = document.getElementById("weekly-print-pages");
+  if (!root) {
+    return;
+  }
+
+  root.innerHTML = "";
+
+  for (let index = 0; index < plan.weeks.length; index += 2) {
+    const pair = plan.weeks.slice(index, index + 2);
+    const pairHtml = pair.map((week) => {
+      const weekDays = plan.days.filter((day) => day.weekLabel === week.label);
+      const menuHtml = weekDays.map((day) => {
+        const mealsHtml = day.meals.map((meal) => `
+          <div class="print-week-meal">
+            <div class="print-week-slot">${meal.slot}</div>
+            <div>
+              <div class="print-week-meal-name">${meal.name}</div>
+              <div class="print-week-meal-note">${meal.dishes.join(" / ")}</div>
+            </div>
+          </div>
+        `).join("");
+
+        return `
+          <article class="print-week-day">
+            <div class="print-week-day-head">
+              <div class="print-week-day-title">${day.day}日 (${weekdayNames[day.weekday]})</div>
+              <div class="tag">${day.isWeekend ? "土日3食" : "平日2食"}</div>
+            </div>
+            <div class="print-week-meals">${mealsHtml}</div>
+          </article>
+        `;
+      }).join("");
+
+      return `
+        <section class="print-fortnight-week">
+          <header class="print-week-page-head">
+            <div>
+              <h2>${plan.year}年${plan.month}月 ${week.label}</h2>
+              <div class="week-range">${week.range}</div>
+            </div>
+          </header>
+          <div class="print-week-days">${menuHtml}</div>
+        </section>
+      `;
+    }).join("");
+
+    root.insertAdjacentHTML("beforeend", `
+      <article class="print-week-page">
+        <div class="print-fortnight-layout">${pairHtml}</div>
+      </article>
+    `);
+  }
 }
 
 function pickBentoName(date, bentoNames) {
@@ -1250,32 +1284,44 @@ function shouldInsertMonthlySpecial(day, daysInMonth, existingDays, specialMealN
 function printSection(section) {
   const monthlyPanel = document.querySelector("#monthly-menu").closest(".panel");
   const shoppingPanel = document.querySelector("#weekly-shopping").closest(".panel");
+  const weeklyPrintPages = document.getElementById("weekly-print-pages");
   const dayCards = Array.from(document.querySelectorAll("#monthly-menu .day-card"));
   const weekCards = Array.from(document.querySelectorAll("#weekly-shopping .week-card"));
 
-  monthlyPanel.classList.toggle("print-hidden", section === "shopping");
-  shoppingPanel.classList.toggle("print-hidden", section === "menu");
+  document.body.classList.toggle("print-all-weeks", section === "all");
+  document.body.classList.remove("print-shopping-week");
+
+  monthlyPanel.classList.toggle("print-hidden", section !== "all");
+  shoppingPanel.classList.toggle("print-hidden", true);
+  if (weeklyPrintPages) {
+    weeklyPrintPages.classList.toggle("print-hidden", section !== "all");
+  }
   dayCards.forEach((card) => card.classList.remove("print-hidden"));
   weekCards.forEach((card) => card.classList.remove("print-hidden"));
 
   window.print();
 
+  document.body.classList.remove("print-all-weeks");
   monthlyPanel.classList.remove("print-hidden");
   shoppingPanel.classList.remove("print-hidden");
+  if (weeklyPrintPages) {
+    weeklyPrintPages.classList.add("print-hidden");
+  }
 }
 
-function printWeek(weekLabel, mode = "both") {
-  const monthlyPanel = document.querySelector("#monthly-menu").closest(".panel");
+function printShoppingWeek(weekLabel) {
   const shoppingPanel = document.querySelector("#weekly-shopping").closest(".panel");
-  const dayCards = Array.from(document.querySelectorAll("#monthly-menu .day-card"));
+  const monthlyPanel = document.querySelector("#monthly-menu").closest(".panel");
+  const weeklyPrintPages = document.getElementById("weekly-print-pages");
   const weekCards = Array.from(document.querySelectorAll("#weekly-shopping .week-card"));
 
-  monthlyPanel.classList.toggle("print-hidden", mode === "shopping");
-  shoppingPanel.classList.toggle("print-hidden", mode === "menu");
-
-  dayCards.forEach((card) => {
-    card.classList.toggle("print-hidden", card.dataset.weekLabel !== weekLabel);
-  });
+  document.body.classList.remove("print-all-weeks");
+  document.body.classList.add("print-shopping-week");
+  monthlyPanel.classList.add("print-hidden");
+  if (weeklyPrintPages) {
+    weeklyPrintPages.classList.add("print-hidden");
+  }
+  shoppingPanel.classList.remove("print-hidden");
 
   weekCards.forEach((card) => {
     card.classList.toggle("print-hidden", card.dataset.weekLabel !== weekLabel);
@@ -1283,10 +1329,8 @@ function printWeek(weekLabel, mode = "both") {
 
   window.print();
 
+  document.body.classList.remove("print-shopping-week");
   monthlyPanel.classList.remove("print-hidden");
-  dayCards.forEach((card) => {
-    card.classList.remove("print-hidden");
-  });
   weekCards.forEach((card) => {
     card.classList.remove("print-hidden");
   });

@@ -153,13 +153,6 @@ h1 {
   margin-bottom: 14px;
 }
 
-.print-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
 .monthly-menu {
   display: grid;
   gap: 14px;
@@ -295,6 +288,76 @@ h1 {
   margin-top: 14px;
 }
 
+.weekly-print-pages {
+  display: none;
+}
+
+.print-fortnight-layout {
+  display: grid;
+  gap: 18px;
+}
+
+.print-fortnight-week {
+  min-width: 0;
+}
+
+.print-week-page {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.print-week-page + .print-week-page {
+  margin-top: 20px;
+}
+
+.print-week-page-head,
+.print-week-day-head,
+.print-week-meal {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.print-week-page-head {
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.print-week-days {
+  display: grid;
+  gap: 10px;
+}
+
+.print-week-day {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.print-week-meals {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.print-week-meal {
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #faf5ee;
+}
+
+.print-week-slot,
+.print-week-meal-name {
+  font-weight: 700;
+}
+
+.print-week-meal-note {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .ingredient-item {
   padding: 10px 12px;
   border-radius: 14px;
@@ -327,15 +390,6 @@ h1 {
     justify-items: stretch;
   }
 
-  .print-actions {
-    width: 100%;
-    justify-content: stretch;
-  }
-
-  .print-actions .print-button {
-    flex: 1 1 auto;
-  }
-
   .week-cost {
     width: 100%;
     text-align: left;
@@ -343,6 +397,11 @@ h1 {
 }
 
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
   body {
     background: #fff;
   }
@@ -364,6 +423,25 @@ h1 {
     margin-top: 0;
   }
 
+  body.print-all-weeks .results {
+    display: none !important;
+  }
+
+  body.print-all-weeks .weekly-print-pages {
+    display: block !important;
+  }
+
+  .weekly-print-pages {
+    margin: 0;
+    padding: 0;
+  }
+
+  body.print-shopping-week .weekly-print-pages,
+  body.print-shopping-week #monthly-menu,
+  body.print-shopping-week .panel:first-child {
+    display: none !important;
+  }
+
   .panel {
     box-shadow: none;
     border: none;
@@ -377,6 +455,7 @@ h1 {
   }
 
   .panel.print-hidden,
+  .weekly-print-pages.print-hidden,
   .day-card.print-hidden,
   .week-card.print-hidden {
     display: none !important;
@@ -388,5 +467,192 @@ h1 {
   .ingredient-item {
     break-inside: avoid;
     box-shadow: none;
+  }
+
+  .print-week-page {
+    break-after: page;
+    break-inside: avoid;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    height: 277mm;
+    overflow: hidden;
+    display: block;
+  }
+
+  .print-week-page:last-child {
+    break-after: auto;
+  }
+
+  .print-week-page + .print-week-page {
+    margin-top: 0;
+  }
+
+  .print-week-page-head {
+    margin-bottom: 0;
+    align-items: end;
+  }
+
+  .print-week-page-head h2 {
+    margin-bottom: 1mm;
+    font-size: 10pt;
+  }
+
+  .week-range,
+  .print-week-day-title,
+  .print-week-slot,
+  .print-week-meal-name,
+  .print-week-meal-note,
+  .tag {
+    line-height: 1.2;
+  }
+
+  .print-fortnight-layout {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4mm;
+    align-items: start;
+    height: 277mm;
+  }
+
+  .print-fortnight-week {
+    min-width: 0;
+  }
+
+  .print-week-days {
+    grid-template-columns: 1fr;
+    gap: 1mm;
+    align-content: start;
+  }
+
+  .print-week-day {
+    padding: 1.4mm;
+    border-radius: 0;
+  }
+
+  .print-week-day-head {
+    margin-bottom: 0.8mm;
+    align-items: center;
+  }
+
+  .print-week-day-title {
+    font-size: 6.8pt;
+  }
+
+  .print-week-meals {
+    gap: 0.8mm;
+    margin-top: 0;
+  }
+
+  .print-week-meal {
+    padding: 0.8mm 1mm;
+    border-radius: 0;
+    gap: 1mm;
+  }
+
+  .print-week-slot {
+    min-width: 7mm;
+    font-size: 6pt;
+  }
+
+  .print-week-meal-name {
+    font-size: 6pt;
+  }
+
+  .print-week-meal-note {
+    font-size: 5pt;
+    margin-top: 0.2mm;
+  }
+
+  .week-range,
+  .tag {
+    font-size: 5pt;
+  }
+
+  body.print-shopping-week .results {
+    display: block;
+  }
+
+  body.print-shopping-week .panel:last-child {
+    display: block !important;
+  }
+
+  body.print-shopping-week .panel:last-child .panel-head {
+    margin-bottom: 3mm;
+  }
+
+  body.print-shopping-week .week-card {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    break-inside: avoid;
+  }
+
+  body.print-shopping-week .week-head {
+    gap: 2mm;
+    margin-bottom: 2mm;
+  }
+
+  body.print-shopping-week .week-head h3 {
+    margin-bottom: 0.8mm;
+    font-size: 11pt;
+  }
+
+  body.print-shopping-week .week-range {
+    font-size: 7pt;
+  }
+
+  body.print-shopping-week .week-actions {
+    gap: 0;
+    justify-items: end;
+  }
+
+  body.print-shopping-week .week-cost {
+    min-width: 0;
+    width: auto;
+    padding: 1.5mm 2mm;
+    border-radius: 0;
+    border: 1px solid var(--line);
+    background: #fff;
+  }
+
+  body.print-shopping-week .week-cost-label {
+    font-size: 6pt;
+  }
+
+  body.print-shopping-week .week-cost-value {
+    margin-top: 0.5mm;
+    font-size: 9pt;
+  }
+
+  body.print-shopping-week .week-cost-note {
+    margin-top: 0;
+    margin-bottom: 2mm;
+    font-size: 6pt;
+    line-height: 1.2;
+  }
+
+  body.print-shopping-week .ingredients {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5mm;
+    margin-top: 0;
+  }
+
+  body.print-shopping-week .ingredient-item {
+    padding: 1.5mm 2mm;
+    border-radius: 0;
+    border: 1px solid var(--line);
+    background: #fff;
+  }
+
+  body.print-shopping-week .ingredient-name {
+    font-size: 7pt;
+    line-height: 1.1;
+  }
+
+  body.print-shopping-week .ingredient-qty {
+    margin-top: 0.5mm;
+    font-size: 6pt;
+    line-height: 1.1;
   }
 }
