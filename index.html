@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>献立AI</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Monthly Menu Planner</p>
+        <h1>献立AI</h1>
+        <p class="lead">平日は朝と夜、土日は3食。月間の献立と週ごとの買い物リストをまとめて作ります。</p>
+      </div>
+      <form id="menu-form" class="controls">
+        <label>
+          対象の年
+          <input id="year" type="number" min="2024" max="2100" required>
+        </label>
+        <label>
+          対象の月
+          <input id="month" type="number" min="1" max="12" required>
+        </label>
+        <label>
+          子どもの人数
+          <input id="kids-count" type="number" min="0" max="20" value="2" required>
+        </label>
+        <label>
+          大人の人数
+          <input id="adult-count" type="number" min="0" max="20" value="1" required>
+        </label>
+        <label>
+          お弁当名1
+          <input id="bento-name-tomari" type="text" value="とまりのお弁当" required>
+        </label>
+        <label>
+          お弁当名2
+          <input id="bento-name-sosodo" type="text" value="そそどのお弁当" required>
+        </label>
+        <button type="submit">献立を作る</button>
+      </form>
+    </section>
+
+    <section class="summary">
+      <div class="card">
+        <h2>ルール</h2>
+        <ul>
+          <li>平日: 朝ごはん、夕ごはん</li>
+          <li>土日: 朝ごはん、昼ごはん、夕ごはん</li>
+          <li>土曜か日曜の夕ごはんに週1回、「とまり」か「そそど」のお弁当を入れる</li>
+          <li>1週間ごとに必要食材を集計する</li>
+          <li>週ごとの買い物金額の目安も表示する</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>出力</h2>
+        <p id="summary-text">年と月を選んで「献立を作る」を押してください。週間の食材リストに概算金額も表示されます。</p>
+      </div>
+    </section>
+
+    <section class="results">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>月間メニュー</h2>
+          <button type="button" id="print-menu" class="print-button">献立を印刷</button>
+        </div>
+        <div id="monthly-menu" class="monthly-menu"></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <h2>週間の食材リスト</h2>
+          <button type="button" id="print-shopping" class="print-button">食材を印刷</button>
+        </div>
+        <div id="weekly-shopping" class="weekly-shopping"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
