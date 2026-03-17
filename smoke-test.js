@@ -3,6 +3,12 @@ const { generateMonthlyPlan, parseManualBentoDays } = require("./app.js");
 const plan = generateMonthlyPlan(2026, 3, {
   tomari: "とまりのお弁当",
   sosodo: "そそどのお弁当",
+  shima: "島ばあちゃんのお弁当",
+  schedule: {
+    "とまりのお弁当": [8, 22],
+    "そそどのお弁当": [15],
+    "島ばあちゃんのお弁当": [29]
+  },
   prices: {
     "とまりのお弁当": 650,
     "そそどのお弁当": 480
@@ -12,6 +18,12 @@ const manualBentoDays = parseManualBentoDays("3, 7, 12, 28", 2026, 3);
 const manualBentoPlan = generateMonthlyPlan(2026, 3, {
   tomari: "とまりのお弁当",
   sosodo: "そそどのお弁当",
+  shima: "島ばあちゃんのお弁当",
+  schedule: {
+    "とまりのお弁当": [8, 22],
+    "そそどのお弁当": [15],
+    "島ばあちゃんのお弁当": [29]
+  },
   prices: {
     "とまりのお弁当": 650,
     "そそどのお弁当": 480
@@ -25,6 +37,7 @@ const bento = plan.days.filter((day) =>
 ).length;
 const tomariBento = plan.days.filter((day) => day.meals.some((meal) => meal.name === "とまりのお弁当")).length;
 const sosodoBento = plan.days.filter((day) => day.meals.some((meal) => meal.name === "そそどのお弁当")).length;
+const shimaBento = plan.days.filter((day) => day.meals.some((meal) => meal.name === "島ばあちゃんのお弁当")).length;
 const curry = plan.days.filter((day) => day.meals.some((meal) => meal.name === "カレーランチ")).length;
 const stew = plan.days.filter((day) => day.meals.some((meal) => meal.name === "クリームシチュー献立")).length;
 const manualBento = manualBentoPlan.days
@@ -44,6 +57,7 @@ console.log(JSON.stringify({
   bento,
   tomariBento,
   sosodoBento,
+  shimaBento,
   curry,
   stew,
   manualBentoDays,

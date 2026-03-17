@@ -1,5 +1,570 @@
 let quantityNormalizationGuide = {};
 let ingredientPriceGuide = {};
+let renderedDays = [];
+
+const recipeGuide = {
+  "親子丼": ["鶏肉と玉ねぎを食べやすく切る。", "フライパンで鶏肉と玉ねぎを煮て火を通す。", "溶き卵を回し入れて半熟で止め、ごはんにのせる。"],
+  "焼きそば": ["具材を切って肉から炒める。", "野菜と麺を加えてほぐしながら炒める。", "ソースで味を整えて仕上げる。"],
+  "チャーハン": ["具材を刻み、卵を溶く。", "卵とごはんを手早く炒める。", "具材と調味料を加えて全体をまとめる。"],
+  "きつねうどん": ["油揚げを軽く煮て味を含ませる。", "うどんをゆでて器に入れる。", "温かいつゆを注ぎ、油揚げとねぎをのせる。"],
+  "カレーライス": ["野菜と肉を切って炒める。", "水を加えてやわらかく煮る。", "ルウを溶かしてとろみがつくまで温め、ごはんに添える。"],
+  "鶏そぼろ丼": ["ひき肉をほぐしながら炒める。", "甘辛く味付けして汁気を飛ばす。", "炒り卵と一緒にごはんへ盛る。"],
+  "ナポリタン": ["具材を切って炒める。", "ゆでたパスタを加える。", "ケチャップで全体を炒め合わせる。"],
+  "牛丼": ["玉ねぎを薄切りにする。", "牛肉と玉ねぎを甘辛く煮る。", "ごはんにのせて汁を回しかける。"],
+  "オムそば": ["焼きそばを作って皿にまとめる。", "薄焼き卵を作る。", "焼きそばに卵をかぶせて整える。"],
+  "中華丼": ["具材を炒めて火を通す。", "スープで煮てとろみをつける。", "ごはんにかけて仕上げる。"],
+  "焼き鳥丼": ["鶏肉とねぎを食べやすく切る。", "こんがり焼いて甘辛く味付けする。", "ごはんにのせる。"],
+  "ビビンバ丼": ["具材をそれぞれ加熱して味をつける。", "ひき肉を炒めてそぼろ状にする。", "ごはんに彩りよく盛る。"],
+  "天津飯": ["卵あん用の材料を用意する。", "ふんわり卵を焼いてごはんにのせる。", "あんを作って上からかける。"],
+  "焼売": ["蒸し器かレンジの表示に合わせて加熱する。", "火が通ったら取り出す。", "ごはんや副菜と一緒に盛る。"],
+  "ミートボール": ["袋やパッケージの表示に合わせて温める。", "ソースを全体にからめる。", "ごはんと一緒に盛る。"],
+  "ミニグラタン": ["オーブンまたはトースターを温める。", "表示時間に合わせて加熱する。", "表面が温まり軽く焼き色がついたら仕上げる。"],
+  "鶏の照り焼き": ["鶏肉の水気をふいて焼く。", "両面に火が通ったら調味料を加える。", "照りが出るまで煮からめる。"],
+  "豚しょうが焼き": ["豚肉と玉ねぎを広げて焼く。", "しょうがだれを加える。", "汁気をからめて仕上げる。"],
+  "サバの塩焼き": ["魚の水気をふく。", "グリルやフライパンで両面を焼く。", "火が通ったら盛る。"],
+  "麻婆豆腐": ["ひき肉とねぎを炒める。", "豆腐を加えて崩さないよう温める。", "麻婆だれを加えてまとめる。"],
+  "オムライス": ["チキンライスを作る。", "卵を半熟に焼く。", "チキンライスにのせて整える。"],
+  "肉じゃが": ["具材を切って軽く炒める。", "だしで煮てやわらかくする。", "調味料を加えて味を含ませる。"],
+  "クリームシチュー": ["具材を炒めて火を通す。", "水で煮てやわらかくする。", "ルウと牛乳を加えてとろみを出す。"],
+  "鮭の塩焼き": ["鮭の水気をふく。", "グリルやフライパンで焼く。", "火が通ったら盛る。"],
+  "チキン南蛮": ["鶏肉に火を通して揚げ焼きにする。", "甘酢にくぐらせる。", "タルタルソースを添える。"],
+  "ハンバーグ": ["たねをこねて形を作る。", "両面を焼いて中まで火を通す。", "ソースをからめて仕上げる。"],
+  "豚肉の野菜炒め": ["肉から炒めて火を通す。", "野菜を加えてさっと炒める。", "味付けして水気を飛ばす。"],
+  "鶏団子鍋": ["鍋つゆを温める。", "鶏団子を入れて火を通す。", "野菜やきのこを加えて煮る。"],
+  "回鍋肉": ["肉と野菜を順に炒める。", "回鍋肉のたれを加える。", "全体を手早くまとめる。"],
+  "塩さば": ["表面の水気をふく。", "グリルやフライパンで焼く。", "焼き色がついたら盛る。"],
+  "エビ寄せフライ": ["表示に合わせて揚げるか温める。", "油を切って盛る。", "付け合わせと一緒に出す。"],
+  "春巻き": ["表示に合わせて揚げるか温める。", "中まで温まったら取り出す。", "食べやすく盛る。"],
+  "コロッケ": ["表示に合わせて揚げるか温める。", "油を切る。", "千切り野菜などを添える。"],
+  "唐揚げ": ["鶏肉に下味をつける。", "衣をまぶして揚げる。", "油を切って盛る。"],
+  "焼き鮭": ["鮭の水気をふく。", "両面を焼いて火を通す。", "粗熱を取って盛る。"],
+  "鶏そぼろ": ["ひき肉をほぐしながら炒める。", "甘辛く味付けする。", "汁気を飛ばして仕上げる。"],
+  "豚の生姜焼き": ["豚肉を広げて焼く。", "しょうがだれを加える。", "つやが出たら止める。"]
+};
+
+const condimentGuide = {
+  "親子丼": ["醤油", "みりん", "砂糖", "だし"],
+  "焼きそば": ["焼きそばソース", "塩", "こしょう"],
+  "チャーハン": ["塩", "こしょう", "醤油", "鶏がらスープの素"],
+  "きつねうどん": ["めんつゆ", "醤油", "みりん"],
+  "カレーライス": ["カレールウ", "塩", "こしょう"],
+  "鶏そぼろ丼": ["醤油", "砂糖", "みりん"],
+  "ナポリタン": ["ケチャップ", "塩", "こしょう"],
+  "牛丼": ["醤油", "みりん", "砂糖", "だし"],
+  "オムそば": ["ソース", "塩", "こしょう"],
+  "中華丼": ["鶏がらスープの素", "醤油", "オイスターソース", "片栗粉"],
+  "焼き鳥丼": ["醤油", "みりん", "砂糖"],
+  "ビビンバ丼": ["ごま油", "醤油", "焼肉のたれ"],
+  "天津飯": ["醤油", "酢", "砂糖", "片栗粉"],
+  "焼売": ["からし", "醤油"],
+  "ミートボール": ["ケチャップ", "ソース"],
+  "ミニグラタン": ["塩", "こしょう"],
+  "鶏の照り焼き": ["醤油", "みりん", "砂糖"],
+  "豚しょうが焼き": ["醤油", "みりん", "しょうが"],
+  "サバの塩焼き": ["塩"],
+  "麻婆豆腐": ["麻婆豆腐の素", "ごま油"],
+  "オムライス": ["ケチャップ", "塩", "こしょう"],
+  "肉じゃが": ["醤油", "みりん", "砂糖", "だし"],
+  "クリームシチュー": ["シチュールウ", "塩", "こしょう"],
+  "鮭の塩焼き": ["塩"],
+  "チキン南蛮": ["酢", "砂糖", "醤油", "タルタルソース"],
+  "ハンバーグ": ["塩", "こしょう", "ケチャップ", "ソース"],
+  "豚肉の野菜炒め": ["塩", "こしょう", "醤油"],
+  "鶏団子鍋": ["だし", "醤油", "塩"],
+  "回鍋肉": ["回鍋肉の素"],
+  "塩さば": ["塩"],
+  "エビ寄せフライ": ["中濃ソース", "タルタルソース"],
+  "春巻き": ["醤油", "からし"],
+  "コロッケ": ["中濃ソース"],
+  "唐揚げ": ["醤油", "しょうが", "にんにく"],
+  "焼き鮭": ["塩"],
+  "鶏そぼろ": ["醤油", "みりん", "砂糖"],
+  "豚の生姜焼き": ["醤油", "みりん", "しょうが"]
+};
+
+const preparedDishNames = new Set([
+  "焼売",
+  "ミートボール",
+  "ミニグラタン",
+  "エビ寄せフライ",
+  "春巻き",
+  "コロッケ",
+  "ポテサラ",
+  "マカロニサラダ惣菜",
+  "きんぴらごぼう惣菜",
+  "鮭フレーク",
+  "そぼろ瓶",
+  "お弁当",
+  "お弁当を準備",
+  "付け合わせ",
+  "汁物はなし"
+]);
+
+const fullRecipeCatalog = {
+  "鮭おにぎり": createRecipe(["塩", "鮭フレーク"], [
+    "温かいごはんに塩少々を混ぜ、鮭フレークを全体に散らす。",
+    "手を軽くぬらしてごはんを取り、具が真ん中にくるように握る。",
+    "形を整え、必要ならのりを巻いて仕上げる。"
+  ]),
+  "バタートースト": createRecipe(["バター"], [
+    "食パンをトースターでこんがり焼く。",
+    "熱いうちにバターを全体へぬる。",
+    "食べやすく切って出す。"
+  ]),
+  "ヨーグルト": createRecipe(["はちみつ"], [
+    "器にヨーグルトを盛る。",
+    "好みではちみつや果物を添える。",
+    "冷たいまま出す。"
+  ]),
+  "納豆ごはん": createRecipe(["しょうゆ", "からし"], [
+    "納豆をたれやからしとよく混ぜる。",
+    "温かいごはんを茶碗によそう。",
+    "納豆をのせ、好みでねぎを散らす。"
+  ]),
+  "ハムチーズトースト": createRecipe(["バター", "マヨネーズ"], [
+    "食パンに薄くバターかマヨネーズをぬる。",
+    "ハムとチーズをのせてトースターで焼く。",
+    "チーズが溶けたら取り出して仕上げる。"
+  ]),
+  "しらすごはん": createRecipe(["しょうゆ"], [
+    "温かいごはんを器によそう。",
+    "しらすをのせる。",
+    "好みでしょうゆを少したらして仕上げる。"
+  ]),
+  "たまごサンド": createRecipe(["マヨネーズ", "塩", "こしょう"], [
+    "卵をゆでて殻をむき、粗くつぶす。",
+    "マヨネーズ、塩、こしょうで和えて卵サラダを作る。",
+    "食パンにはさんで切る。"
+  ]),
+  "鮭茶漬け": createRecipe(["お茶漬けの素"], [
+    "ごはんを器によそう。",
+    "鮭フレークとお茶漬けの素をのせる。",
+    "熱いお茶または湯を注いで仕上げる。"
+  ]),
+  "フレンチトースト": createRecipe(["砂糖", "バター"], [
+    "卵、牛乳、砂糖を混ぜて卵液を作る。",
+    "食パンを卵液に浸してしみ込ませる。",
+    "バターを溶かしたフライパンで両面を焼く。"
+  ]),
+  "親子丼": createRecipe(["しょうゆ", "みりん", "砂糖", "だし"], [
+    "玉ねぎは薄切り、鶏肉はひと口大に切る。",
+    "だしと調味料で玉ねぎと鶏肉を煮る。",
+    "溶き卵を回し入れて半熟で止め、ごはんにのせる。"
+  ]),
+  "焼きそば": createRecipe(["焼きそばソース", "塩", "こしょう"], [
+    "肉と野菜を順に炒める。",
+    "麺を加えてほぐし、水少々を入れて蒸し焼きにする。",
+    "ソースで味をつけて全体を炒め合わせる。"
+  ]),
+  "チャーハン": createRecipe(["塩", "こしょう", "しょうゆ", "鶏がらスープの素"], [
+    "卵を炒めて半熟にし、ごはんを加えてほぐす。",
+    "刻んだ具材を加えてさらに炒める。",
+    "調味料で味を整え、仕上げにしょうゆを回しかける。"
+  ]),
+  "きつねうどん": createRecipe(["めんつゆ", "しょうゆ", "みりん"], [
+    "油揚げは甘辛くさっと煮ておく。",
+    "うどんをゆでるか温めて器に入れる。",
+    "熱いつゆを注ぎ、油揚げとねぎをのせる。"
+  ]),
+  "カレーライス": createRecipe(["カレールウ", "塩", "こしょう"], [
+    "肉、玉ねぎ、にんじん、じゃがいもを炒める。",
+    "水を加えて野菜がやわらかくなるまで煮る。",
+    "火を止めてルウを溶かし、再度温めてとろみを出す。"
+  ]),
+  "鶏そぼろ丼": createRecipe(["しょうゆ", "みりん", "砂糖"], [
+    "鶏ひき肉をほぐしながら炒める。",
+    "しょうゆ、みりん、砂糖で甘辛く味付けする。",
+    "汁気を飛ばし、ごはんにのせる。"
+  ]),
+  "ナポリタン": createRecipe(["ケチャップ", "塩", "こしょう", "バター"], [
+    "パスタをゆでる。",
+    "玉ねぎ、ピーマン、ウインナーを炒める。",
+    "パスタを加えてケチャップで炒め合わせ、味を整える。"
+  ]),
+  "牛丼": createRecipe(["しょうゆ", "みりん", "砂糖", "だし"], [
+    "玉ねぎを薄切りにし、牛肉は食べやすくする。",
+    "だしと調味料で玉ねぎを煮て、牛肉を加える。",
+    "アクを取りながら煮て、ごはんにのせる。"
+  ]),
+  "オムそば": createRecipe(["ソース", "塩", "こしょう", "ケチャップ"], [
+    "焼きそばを作って皿にまとめる。",
+    "卵を溶いて薄焼きにする。",
+    "焼きそばに卵をかぶせ、好みでソースをかける。"
+  ]),
+  "中華丼": createRecipe(["鶏がらスープの素", "しょうゆ", "オイスターソース", "片栗粉"], [
+    "肉と野菜を火の通りに合わせて炒める。",
+    "スープと調味料を加えて煮る。",
+    "水溶き片栗粉でとろみをつけ、ごはんにかける。"
+  ]),
+  "焼き鳥丼": createRecipe(["しょうゆ", "みりん", "砂糖"], [
+    "鶏肉とねぎを食べやすく切る。",
+    "フライパンで焼き目をつけ、調味料を加えて煮からめる。",
+    "ごはんにのせる。"
+  ]),
+  "ビビンバ丼": createRecipe(["ごま油", "しょうゆ", "焼肉のたれ", "コチュジャン"], [
+    "ひき肉を炒めて調味料で味をつける。",
+    "野菜はそれぞれゆでるか炒めて下味をつける。",
+    "ごはんに具を彩りよくのせる。"
+  ]),
+  "天津飯": createRecipe(["しょうゆ", "酢", "砂糖", "片栗粉", "鶏がらスープの素"], [
+    "卵を溶き、かにかまを混ぜて半熟の卵焼きを作る。",
+    "別鍋でスープと調味料を温める。",
+    "水溶き片栗粉であんを作り、卵をのせたごはんにかける。"
+  ]),
+  "鶏の照り焼き": createRecipe(["しょうゆ", "みりん", "砂糖"], [
+    "鶏肉の余分な水気をふき、皮目から焼く。",
+    "裏返して中まで火を通す。",
+    "調味料を加えて照りが出るまで煮からめる。"
+  ]),
+  "豚しょうが焼き": createRecipe(["しょうゆ", "みりん", "しょうが"], [
+    "豚肉を広げて焼き、玉ねぎも一緒に炒める。",
+    "火が通ったらしょうが入りのたれを加える。",
+    "汁気を軽く煮詰めて仕上げる。"
+  ]),
+  "サバの塩焼き": createRecipe(["塩"], [
+    "さばの水気をふき、塩をふる。",
+    "グリルやフライパンで皮目から焼く。",
+    "両面に火が通ったら盛る。"
+  ]),
+  "麻婆豆腐": createRecipe(["麻婆豆腐の素", "ごま油"], [
+    "ひき肉とねぎを炒める。",
+    "豆腐を加えて崩しすぎないよう温める。",
+    "麻婆豆腐の素で味をまとめ、仕上げにごま油を加える。"
+  ]),
+  "オムライス": createRecipe(["ケチャップ", "塩", "こしょう", "バター"], [
+    "鶏肉と玉ねぎを炒め、ごはんとケチャップでチキンライスを作る。",
+    "卵を溶いてフライパンで半熟に焼く。",
+    "チキンライスに卵をのせて包むかかぶせる。"
+  ]),
+  "肉じゃが": createRecipe(["しょうゆ", "みりん", "砂糖", "だし"], [
+    "じゃがいも、玉ねぎ、にんじん、肉を切る。",
+    "鍋で軽く炒めてからだしを加えて煮る。",
+    "調味料を加え、汁気が落ち着くまで煮含める。"
+  ]),
+  "クリームシチュー": createRecipe(["シチュールウ", "塩", "こしょう"], [
+    "肉と野菜をバターや油で炒める。",
+    "水を加えて具材がやわらかくなるまで煮る。",
+    "ルウと牛乳を加えてとろみがつくまで温める。"
+  ]),
+  "鮭の塩焼き": createRecipe(["塩"], [
+    "鮭の水気をふき、塩をふる。",
+    "グリルやフライパンで両面を焼く。",
+    "中まで火が通ったら仕上げる。"
+  ]),
+  "チキン南蛮": createRecipe(["しょうゆ", "酢", "砂糖", "タルタルソース"], [
+    "鶏肉に下味をつけて衣をまとわせ、揚げ焼きにする。",
+    "しょうゆ、酢、砂糖で作った甘酢にくぐらせる。",
+    "器に盛ってタルタルソースを添える。"
+  ]),
+  "ハンバーグ": createRecipe(["塩", "こしょう", "ケチャップ", "中濃ソース"], [
+    "ひき肉に塩を加えてよく練り、玉ねぎ、卵、パン粉を混ぜる。",
+    "小判形にして中央をくぼませ、両面を焼く。",
+    "ふたをして中まで火を通し、ソースをかける。"
+  ]),
+  "豚肉の野菜炒め": createRecipe(["塩", "こしょう", "しょうゆ", "ごま油"], [
+    "豚肉を先に炒めて取り出す。",
+    "野菜を強めの火でさっと炒める。",
+    "豚肉を戻し、調味料で手早くまとめる。"
+  ]),
+  "鶏団子鍋": createRecipe(["だし", "しょうゆ", "塩"], [
+    "鍋にだしを温める。",
+    "鶏団子を入れて火を通す。",
+    "白菜やねぎ、えのきを加えて煮る。"
+  ]),
+  "回鍋肉": createRecipe(["回鍋肉の素"], [
+    "豚肉を炒めて一度取り出す。",
+    "キャベツとピーマンを炒める。",
+    "肉を戻し、回鍋肉の素で全体を炒め合わせる。"
+  ]),
+  "塩さば": createRecipe(["塩"], [
+    "塩さばの水気をふく。",
+    "皮目から香ばしく焼く。",
+    "裏返して中まで火を通す。"
+  ]),
+  "唐揚げ": createRecipe(["しょうゆ", "しょうが", "にんにく", "片栗粉"], [
+    "鶏肉を食べやすく切り、しょうゆ、しょうが、にんにくで下味をつける。",
+    "片栗粉をまぶす。",
+    "油で揚げて中まで火を通す。"
+  ]),
+  "焼き鮭": createRecipe(["塩"], [
+    "鮭の水気をふく。",
+    "グリルやフライパンで両面を焼く。",
+    "火が通ったら取り出す。"
+  ]),
+  "鶏そぼろ": createRecipe(["しょうゆ", "みりん", "砂糖"], [
+    "鶏ひき肉をフライパンへ入れ、ほぐしながら加熱する。",
+    "しょうゆ、みりん、砂糖を加える。",
+    "汁気が少なくなるまで炒りつける。"
+  ]),
+  "豚の生姜焼き": createRecipe(["しょうゆ", "みりん", "しょうが"], [
+    "豚肉を広げて焼く。",
+    "しょうがを利かせたたれを加える。",
+    "つやが出るまでからめる。"
+  ]),
+  "ほうれん草のおひたし": createRecipe(["しょうゆ", "だし"], [
+    "ほうれん草をさっとゆでて冷水に取る。",
+    "水気をしっかり絞って食べやすく切る。",
+    "だししょうゆをかけて仕上げる。"
+  ]),
+  "きゅうりの浅漬け": createRecipe(["塩", "酢"], [
+    "きゅうりを薄切りにする。",
+    "塩をまぶしてしばらく置き、水気を絞る。",
+    "酢を加えて軽くなじませる。"
+  ]),
+  "トマトサラダ": createRecipe(["オリーブオイル", "塩", "こしょう"], [
+    "トマトを食べやすく切る。",
+    "器に盛って調味料を回しかける。",
+    "冷やして出す。"
+  ]),
+  "ゆで卵": createRecipe(["塩"], [
+    "卵を水から入れて加熱する。",
+    "好みの固さになったら冷水に取る。",
+    "殻をむいて仕上げる。"
+  ]),
+  "バナナ": createRecipe([], [
+    "食べやすい長さに切る。",
+    "必要なら皮をむいて器に盛る。",
+    "そのまま出す。"
+  ]),
+  "りんご": createRecipe(["塩水"], [
+    "りんごを洗ってくし形に切る。",
+    "好みで皮をむき、変色防止に薄い塩水へさっとくぐらせる。",
+    "水気を切って盛る。"
+  ]),
+  "ハッシュドポテト": createRecipe(["塩", "こしょう"], [
+    "じゃがいもを細切りまたはすりおろして水気を切る。",
+    "塩、こしょうで下味をつける。",
+    "フライパンで両面をこんがり焼く。"
+  ]),
+  "豆腐とわかめの味噌汁": createRecipe(["味噌", "だし"], [
+    "鍋でだしを温める。",
+    "豆腐とわかめを加えて軽く煮る。",
+    "火を弱めて味噌を溶き入れる。"
+  ]),
+  "ねぎの味噌汁": createRecipe(["味噌", "だし"], [
+    "鍋でだしを温める。",
+    "ねぎを加えてやわらかくする。",
+    "味噌を溶き入れて仕上げる。"
+  ]),
+  "コーンスープ": createRecipe(["コンソメ", "塩", "こしょう"], [
+    "鍋に水または牛乳とコーンを入れて温める。",
+    "コンソメを加える。",
+    "塩、こしょうで味を整える。"
+  ]),
+  "じゃがいもの味噌汁": createRecipe(["味噌", "だし"], [
+    "じゃがいもを薄めに切る。",
+    "だしでじゃがいもがやわらかくなるまで煮る。",
+    "味噌を溶いて仕上げる。"
+  ]),
+  "冷ややっこ": createRecipe(["しょうゆ", "おろししょうが"], [
+    "豆腐の水気を軽く切る。",
+    "器に盛る。",
+    "しょうゆやおろししょうがを添える。"
+  ]),
+  "コールスロー": createRecipe(["マヨネーズ", "酢", "塩", "こしょう"], [
+    "キャベツとにんじんをせん切りにする。",
+    "塩少々でもんで水気を絞る。",
+    "マヨネーズと酢で和え、こしょうで整える。"
+  ]),
+  "小松菜のおひたし": createRecipe(["しょうゆ", "だし"], [
+    "小松菜をさっとゆでる。",
+    "冷水に取り、水気を絞って切る。",
+    "だししょうゆで和える。"
+  ]),
+  "春雨サラダ": createRecipe(["酢", "しょうゆ", "砂糖", "ごま油"], [
+    "春雨をゆでて水気を切る。",
+    "きゅうりを細切りにする。",
+    "調味料を合わせて全体を和える。"
+  ]),
+  "ちくわ磯辺焼き": createRecipe(["しょうゆ", "青のり"], [
+    "ちくわを食べやすく切る。",
+    "青のりを混ぜた衣をからめる。",
+    "フライパンか揚げ焼きで火を通す。"
+  ]),
+  "ポテトサラダ": createRecipe(["マヨネーズ", "塩", "こしょう", "酢"], [
+    "じゃがいもをやわらかくゆでて湯を切り、熱いうちにつぶす。",
+    "薄切り玉ねぎは水にさらし、きゅうりは塩もみして水気を切る。",
+    "じゃがいもに酢と塩で下味をつけ、具材とマヨネーズを混ぜてこしょうで整える。"
+  ]),
+  "ブロッコリーサラダ": createRecipe(["マヨネーズ", "塩", "こしょう"], [
+    "ブロッコリーを小房に分けてゆでる。",
+    "水気をよく切って粗熱を取る。",
+    "調味料で和える。"
+  ]),
+  "味噌汁": createRecipe(["味噌", "だし"], [
+    "鍋でだしを温める。",
+    "具材を加えて火を通す。",
+    "火を弱めて味噌を溶き入れる。"
+  ]),
+  "わかめスープ": createRecipe(["鶏がらスープの素", "塩", "こしょう"], [
+    "鍋に湯を沸かしてスープの素を入れる。",
+    "わかめを加えて戻す。",
+    "塩、こしょうで味を整える。"
+  ]),
+  "中華スープ": createRecipe(["鶏がらスープの素", "塩", "こしょう", "ごま油"], [
+    "鍋に湯を沸かしてスープの素を溶かす。",
+    "溶き卵を細く流し入れる。",
+    "ごま油少々で香りをつける。"
+  ]),
+  "コンソメスープ": createRecipe(["コンソメ", "塩", "こしょう"], [
+    "鍋で湯を沸かし、コンソメを溶かす。",
+    "玉ねぎなど具材を加えて煮る。",
+    "塩、こしょうで味を整える。"
+  ]),
+  "ブロッコリーのおかか和え": createRecipe(["しょうゆ", "かつお節"], [
+    "ブロッコリーを小房に分けてゆでる。",
+    "水気を切って粗熱を取る。",
+    "しょうゆとかつお節で和える。"
+  ]),
+  "きんぴらごぼう": createRecipe(["しょうゆ", "みりん", "ごま油", "赤唐辛子"], [
+    "ごぼうとにんじんを細切りにする。",
+    "ごま油で炒めてしんなりさせる。",
+    "しょうゆとみりんで味をつけ、汁気が少なくなるまで炒める。"
+  ]),
+  "卵焼き": createRecipe(["砂糖", "しょうゆ", "塩"], [
+    "卵を溶いて調味料を混ぜる。",
+    "薄く油をひいた卵焼き器に数回に分けて流し入れる。",
+    "巻きながら焼いて形を整える。"
+  ]),
+  "ほうれん草のごま和え": createRecipe(["すりごま", "しょうゆ", "砂糖"], [
+    "ほうれん草をゆでて冷水に取り、水気を絞って切る。",
+    "すりごま、しょうゆ、砂糖を混ぜる。",
+    "ほうれん草を和えて仕上げる。"
+  ]),
+  "ミニトマト": createRecipe([], [
+    "へたを取ってよく洗う。",
+    "水気をふく。",
+    "そのまま器に盛る。"
+  ]),
+  "千切りキャベツ": createRecipe(["塩", "好みでドレッシング"], [
+    "キャベツを細くせん切りにする。",
+    "冷水にさっとさらしてしゃきっとさせる。",
+    "水気を切って盛る。"
+  ]),
+  "ひじき煮": createRecipe(["しょうゆ", "みりん", "砂糖", "だし"], [
+    "ひじきを戻し、にんじんと油揚げを細切りにする。",
+    "具材を炒めてだしを加える。",
+    "調味料を加えて汁気が少なくなるまで煮る。"
+  ]),
+  "もやしナムル": createRecipe(["ごま油", "塩", "鶏がらスープの素"], [
+    "もやしをさっとゆでる。",
+    "水気をよく切る。",
+    "ごま油、塩、スープの素で和える。"
+  ]),
+  "ツナサラダ": createRecipe(["マヨネーズ", "塩", "こしょう"], [
+    "レタスを洗ってちぎる。",
+    "ツナの油を軽く切る。",
+    "全体を混ぜて調味料で整える。"
+  ]),
+  "マカロニサラダ": createRecipe(["マヨネーズ", "塩", "こしょう", "酢"], [
+    "マカロニを表示通りにゆでる。",
+    "きゅうりは塩もみし、ハムは細切りにする。",
+    "粗熱を取ったマカロニと具材をマヨネーズで和える。"
+  ]),
+  "切り干し大根": createRecipe(["しょうゆ", "みりん", "砂糖", "だし"], [
+    "切り干し大根を戻して水気を絞る。",
+    "にんじん、油揚げと一緒に炒める。",
+    "だしと調味料を加え、煮含める。"
+  ]),
+  "白菜の浅漬け": createRecipe(["塩", "昆布"], [
+    "白菜を食べやすく切る。",
+    "塩をまぶしてしばらく置く。",
+    "水気を軽く絞り、昆布と一緒になじませる。"
+  ]),
+  "豆腐の味噌汁": createRecipe(["味噌", "だし"], [
+    "鍋でだしを温める。",
+    "豆腐を加えて温める。",
+    "味噌を溶き入れる。"
+  ]),
+  "卵スープ": createRecipe(["鶏がらスープの素", "塩", "こしょう", "ごま油"], [
+    "鍋でスープを温める。",
+    "溶き卵を少しずつ流し入れる。",
+    "塩、こしょうで味を整え、ごま油を落とす。"
+  ]),
+  "なめこの味噌汁": createRecipe(["味噌", "だし"], [
+    "鍋でだしを温める。",
+    "なめこを加えてさっと煮る。",
+    "味噌を溶いて仕上げる。"
+  ]),
+  "白菜スープ": createRecipe(["コンソメ", "塩", "こしょう"], [
+    "白菜を食べやすく切る。",
+    "コンソメスープで白菜をやわらかく煮る。",
+    "塩、こしょうで味を整える。"
+  ]),
+  "大根の味噌汁": createRecipe(["味噌", "だし"], [
+    "大根を薄切りまたはいちょう切りにする。",
+    "だしでやわらかくなるまで煮る。",
+    "味噌を溶き入れる。"
+  ])
+};
+
+const condimentAliasGuide = {
+  "しょうゆ": "醤油",
+  "だし": "和風だし",
+  "ごま油": "ごま油",
+  "オリーブオイル": "オリーブオイル",
+  "マヨネーズ": "マヨネーズ",
+  "ケチャップ": "ケチャップ",
+  "中濃ソース": "中濃ソース",
+  "焼きそばソース": "焼きそばソース",
+  "鶏がらスープの素": "鶏がらスープの素",
+  "コンソメ": "コンソメ",
+  "味噌": "味噌",
+  "砂糖": "砂糖",
+  "塩": "塩",
+  "こしょう": "こしょう",
+  "酢": "酢",
+  "片栗粉": "片栗粉",
+  "バター": "バター",
+  "にんにく": "にんにく",
+  "しょうが": "しょうが",
+  "コチュジャン": "コチュジャン",
+  "タルタルソース": "タルタルソース",
+  "回鍋肉の素": "回鍋肉の素",
+  "麻婆豆腐の素": "麻婆豆腐の素",
+  "からし": "からし",
+  "昆布": "昆布",
+  "かつお節": "かつお節",
+  "赤唐辛子": "赤唐辛子",
+  "焼肉のたれ": "焼肉のたれ"
+};
+
+const condimentAmountGuide = {
+  "醤油": "10ml",
+  "みりん": "10ml",
+  "砂糖": "5g",
+  "塩": "2g",
+  "こしょう": "1g",
+  "酢": "10ml",
+  "和風だし": "400ml",
+  "鶏がらスープの素": "1食分",
+  "コンソメ": "1個",
+  "ごま油": "5ml",
+  "オリーブオイル": "5ml",
+  "マヨネーズ": "24g",
+  "すりごま": "12g",
+  "ケチャップ": "30g",
+  "中濃ソース": "15ml",
+  "焼きそばソース": "30ml",
+  "味噌": "36g",
+  "片栗粉": "9g",
+  "バター": "10g",
+  "にんにく": "1片",
+  "しょうが": "1片",
+  "コチュジャン": "5g",
+  "タルタルソース": "24g",
+  "回鍋肉の素": "1箱",
+  "麻婆豆腐の素": "1箱",
+  "からし": "2g",
+  "昆布": "5cm",
+  "かつお節": "1袋",
+  "赤唐辛子": "1本",
+  "焼肉のたれ": "15ml"
+};
+
+function createRecipe(condiments, steps) {
+  return { condiments, steps };
+}
 
 const breakfastOptions = [
   createMeal("鮭おにぎり朝食", "和朝食", ["鮭おにぎり"], {
@@ -13,16 +578,15 @@ const breakfastOptions = [
     "レタス": "1玉"
   }),
   createMeal("ヨーグルト朝食", "軽め", ["ヨーグルト"], {
-    "ヨーグルト": "2パック",
-    "バナナ": "1房",
-    "グラノーラ": "1袋",
-    "食パン": "1斤",
-    "はちみつ": "1本"
+    "ヨーグルト": "200g",
+    "バナナ": "2本",
+    "グラノーラ": "100g",
+    "食パン": "4枚",
+    "はちみつ": "20g"
   }),
   createMeal("納豆ごはん朝食", "定番", ["納豆ごはん"], {
     "ごはん": "2合",
     "納豆": "3パック",
-    "味噌": "1パック",
     "ねぎ": "1束"
   }),
   createMeal("ハムチーズ朝食", "パン朝食", ["ハムチーズトースト"], {
@@ -38,7 +602,7 @@ const breakfastOptions = [
   createMeal("たまごサンド朝食", "パン朝食", ["たまごサンド"], {
     "食パン": "1斤",
     "卵": "4個",
-    "マヨネーズ": "1本"
+    "マヨネーズ": "40g"
   }),
   createMeal("お茶漬け朝食", "軽め", ["鮭茶漬け"], {
     "ごはん": "2合",
@@ -95,7 +659,7 @@ const lunchOptions = [
     "ウインナー": "1袋",
     "玉ねぎ": "1個",
     "ピーマン": "2個",
-    "ケチャップ": "1本"
+    "ケチャップ": "60g"
   }),
   createMeal("牛丼ランチ", "丼もの", ["牛丼"], {
     "牛こま肉": "300g",
@@ -152,9 +716,7 @@ const lunchOptions = [
 const dinnerOptions = [
   createMeal("鶏の照り焼き定食", "主菜", ["鶏の照り焼き"], {
     "鶏もも肉": "2枚",
-    "キャベツ": "0.5玉",
-    "醤油": "1本",
-    "みりん": "1本"
+    "キャベツ": "0.5玉"
   }),
   createMeal("豚しょうが焼き定食", "主菜", ["豚しょうが焼き"], {
     "豚ロース": "300g",
@@ -169,7 +731,7 @@ const dinnerOptions = [
   }),
   createMeal("麻婆豆腐定食", "中華", ["麻婆豆腐"], {
     "ひき肉": "250g",
-    "豆腐": "2丁",
+    "豆腐": "1丁",
     "長ねぎ": "1本",
     "麻婆豆腐の素": "1箱"
   }),
@@ -178,7 +740,7 @@ const dinnerOptions = [
     "卵": "4個",
     "鶏もも肉": "200g",
     "玉ねぎ": "1個",
-    "ケチャップ": "1本"
+    "ケチャップ": "60g"
   }),
   createMeal("肉じゃが定食", "和食", ["肉じゃが"], {
     "じゃがいも": "4個",
@@ -198,7 +760,6 @@ const dinnerOptions = [
   createMeal("鮭の焼き魚定食", "魚", ["鮭の塩焼き"], {
     "鮭": "2切れ",
     "ごはん": "2合",
-    "味噌": "1パック",
     "豆腐": "1丁"
   }),
   createMeal("チキン南蛮定食", "主菜", ["チキン南蛮"], {
@@ -291,7 +852,7 @@ const bentoOptions = [
     "卵": "3個",
     "鶏もも肉": "180g",
     "玉ねぎ": "1個",
-    "ケチャップ": "120g"
+    "ケチャップ": "45g"
   })
 ];
 
@@ -301,16 +862,16 @@ const sideOptions = {
     createSide("きゅうりの浅漬け", { "きゅうり": "2本" }),
     createSide("トマトサラダ", { "トマト": "2個" }),
     createSide("ゆで卵", { "卵": "2個" }),
-    createSide("バナナ", { "バナナ": "1房" }),
+    createSide("バナナ", { "バナナ": "2本" }),
     createSide("りんご", { "りんご": "2個" }),
-    createSide("ヨーグルト", { "ヨーグルト": "1パック" }),
+    createSide("ヨーグルト", { "ヨーグルト": "200g" }),
     createSide("ハッシュドポテト", { "じゃがいも": "2個" })
   ],
   breakfastSoup: [
-    createSide("豆腐とわかめの味噌汁", { "味噌": "1パック", "豆腐": "1丁", "わかめ": "1袋" }),
-    createSide("ねぎの味噌汁", { "味噌": "1パック", "ねぎ": "1束" }),
-    createSide("コーンスープ", { "コーンスープ": "1箱" }),
-    createSide("じゃがいもの味噌汁", { "味噌": "1パック", "じゃがいも": "2個" })
+    createSide("豆腐とわかめの味噌汁", { "豆腐": "0.5丁", "わかめ": "4g" }),
+    createSide("ねぎの味噌汁", { "ねぎ": "20g" }),
+    createSide("コーンスープ", { "コーンスープ": "2食分" }),
+    createSide("じゃがいもの味噌汁", { "じゃがいも": "1個" })
   ],
   lunch: [
     createSide("冷ややっこ", { "豆腐": "1丁" }),
@@ -325,17 +886,17 @@ const sideOptions = {
     createSide("きんぴらごぼう惣菜", { "きんぴらごぼう惣菜": "1パック" })
   ],
   lunchSoup: [
-    createSide("味噌汁", { "味噌": "1パック", "豆腐": "1丁" }),
-    createSide("わかめスープ", { "わかめ": "1袋", "中華スープの素": "1袋" }),
-    createSide("中華スープ", { "中華スープの素": "1袋", "卵": "2個" }),
-    createSide("コンソメスープ", { "コンソメ": "1箱", "玉ねぎ": "1個" })
+    createSide("味噌汁", { "豆腐": "0.5丁" }),
+    createSide("わかめスープ", { "わかめ": "4g" }),
+    createSide("中華スープ", { "卵": "2個" }),
+    createSide("コンソメスープ", { "玉ねぎ": "0.5個" })
   ],
   bento: [
     createSide("ブロッコリーのおかか和え", { "ブロッコリー": "1株" }),
     createSide("きんぴらごぼう", { "ごぼう": "1本", "にんじん": "1本" }),
     createSide("卵焼き", { "卵": "2個" }),
     createSide("ポテトサラダ", { "じゃがいも": "3個", "きゅうり": "2本" }),
-    createSide("ほうれん草のごま和え", { "ほうれん草": "1束", "すりごま": "1袋" }),
+    createSide("ほうれん草のごま和え", { "ほうれん草": "1束" }),
     createSide("ミニトマト", { "ミニトマト": "8個" })
   ],
   dinner: [
@@ -346,7 +907,7 @@ const sideOptions = {
     createSide("もやしナムル", { "もやし": "1袋" }),
     createSide("ブロッコリーサラダ", { "ブロッコリー": "1株" }),
     createSide("冷ややっこ", { "豆腐": "1丁" }),
-    createSide("ほうれん草のごま和え", { "ほうれん草": "1束", "すりごま": "1袋" }),
+    createSide("ほうれん草のごま和え", { "ほうれん草": "1束" }),
     createSide("きんぴらごぼう", { "ごぼう": "1本", "にんじん": "1本" }),
     createSide("きんぴらごぼう惣菜", { "きんぴらごぼう惣菜": "1パック" }),
     createSide("ツナサラダ", { "ツナ缶": "1缶", "レタス": "1玉" }),
@@ -358,12 +919,12 @@ const sideOptions = {
     createSide("そぼろ瓶", { "鶏そぼろ瓶": "1瓶" })
   ],
   dinnerSoup: [
-    createSide("豆腐の味噌汁", { "味噌": "1パック", "豆腐": "1丁" }),
-    createSide("卵スープ", { "卵": "2個", "中華スープの素": "1袋" }),
-    createSide("コンソメスープ", { "コンソメ": "1箱", "玉ねぎ": "1個" }),
-    createSide("なめこの味噌汁", { "味噌": "1パック", "なめこ": "1袋" }),
-    createSide("白菜スープ", { "白菜": "0.5玉", "コンソメ": "1箱" }),
-    createSide("大根の味噌汁", { "味噌": "1パック", "大根": "0.5本" })
+    createSide("豆腐の味噌汁", { "豆腐": "0.5丁" }),
+    createSide("卵スープ", { "卵": "2個" }),
+    createSide("コンソメスープ", { "玉ねぎ": "0.5個" }),
+    createSide("なめこの味噌汁", { "なめこ": "100g" }),
+    createSide("白菜スープ", { "白菜": "200g" }),
+    createSide("大根の味噌汁", { "大根": "150g" })
   ]
 };
 
@@ -430,11 +991,13 @@ quantityNormalizationGuide = {
   "スライスチーズ": { fromUnit: "パック", toUnit: "枚", multiplier: 7 },
   "しらす": { fromUnit: "パック", toUnit: "g", multiplier: 80 },
   "マヨネーズ": { fromUnit: "本", toUnit: "g", multiplier: 400 },
+  "醤油": { fromUnit: "本", toUnit: "ml", multiplier: 1000 },
   "お茶漬けの素": { fromUnit: "袋", toUnit: "食分", multiplier: 4 },
   "もやし": { fromUnit: "袋", toUnit: "g", multiplier: 200 },
   "焼豚": { fromUnit: "パック", toUnit: "g", multiplier: 120 },
   "油揚げ": { fromUnit: "パック", toUnit: "枚", multiplier: 2 },
   "めんつゆ": { fromUnit: "本", toUnit: "ml", multiplier: 500 },
+  "みりん": { fromUnit: "本", toUnit: "ml", multiplier: 500 },
   "カレールウ": { fromUnit: "箱", toUnit: "皿分", multiplier: 8 },
   "スパゲッティ": { fromUnit: "袋", toUnit: "g", multiplier: 300 },
   "ウインナー": { fromUnit: "袋", toUnit: "g", multiplier: 120 },
@@ -484,6 +1047,7 @@ ingredientPriceGuide = {
   "トマト": { unit: "個", pricePerUnit: 120 },
   "しらす": { unit: "g", pricePerUnit: 3.75 },
   "マヨネーズ": { unit: "g", pricePerUnit: 0.7 },
+  "醤油": { unit: "ml", pricePerUnit: 0.2 },
   "お茶漬けの素": { unit: "食分", pricePerUnit: 45 },
   "牛乳": { unit: "本", pricePerUnit: 250 },
   "鶏もも肉": { unit: "g", pricePerUnit: 1.3 },
@@ -497,6 +1061,7 @@ ingredientPriceGuide = {
   "長ねぎ": { unit: "本", pricePerUnit: 120 },
   "油揚げ": { unit: "枚", pricePerUnit: 70 },
   "めんつゆ": { unit: "ml", pricePerUnit: 0.56 },
+  "みりん": { unit: "ml", pricePerUnit: 0.4 },
   "カレールウ": { unit: "皿分", pricePerUnit: 32.5 },
   "じゃがいも": { unit: "個", pricePerUnit: 50 },
   "にんじん": { unit: "本", pricePerUnit: 60 },
@@ -556,7 +1121,21 @@ ingredientPriceGuide = {
   "鶏そぼろ瓶": { unit: "瓶", pricePerUnit: 464 },
   "ミニグラタン": { unit: "袋", pricePerUnit: 742 },
   "春巻き": { unit: "袋", pricePerUnit: 651 },
-  "コロッケ": { unit: "袋", pricePerUnit: 1030 }
+  "コロッケ": { unit: "袋", pricePerUnit: 1030 },
+  "和風だし": { unit: "ml", pricePerUnit: 0.28 },
+  "ごま油": { unit: "ml", pricePerUnit: 1.2 },
+  "オリーブオイル": { unit: "ml", pricePerUnit: 1.6 },
+  "砂糖": { unit: "g", pricePerUnit: 0.24 },
+  "塩": { unit: "g", pricePerUnit: 0.06 },
+  "こしょう": { unit: "g", pricePerUnit: 1.8 },
+  "酢": { unit: "ml", pricePerUnit: 0.32 },
+  "焼きそばソース": { unit: "ml", pricePerUnit: 0.48 },
+  "からし": { unit: "g", pricePerUnit: 1.1 },
+  "昆布": { unit: "cm", pricePerUnit: 5 },
+  "かつお節": { unit: "袋", pricePerUnit: 35 },
+  "赤唐辛子": { unit: "本", pricePerUnit: 12 },
+  "焼肉のたれ": { unit: "ml", pricePerUnit: 0.55 },
+  "コチュジャン": { unit: "g", pricePerUnit: 0.7 }
 };
 
 if (typeof document !== "undefined") {
@@ -572,7 +1151,11 @@ if (typeof document !== "undefined") {
       const kidsCount = Math.max(0, Number(document.getElementById("kids-count").value) || 0);
       const adultCount = Math.max(0, Number(document.getElementById("adult-count").value) || 0);
       const tomariName = document.getElementById("bento-name-tomari").value.trim() || "とまりのお弁当";
+      const tomariDays = parseScheduledBentoDays(document.getElementById("bento-days-tomari").value, year, month);
       const sosodoName = document.getElementById("bento-name-sosodo").value.trim() || "そそどのお弁当";
+      const sosodoDays = parseScheduledBentoDays(document.getElementById("bento-days-sosodo").value, year, month);
+      const shimaName = document.getElementById("bento-name-shima").value.trim() || "島ばあちゃんのお弁当";
+      const shimaDays = parseScheduledBentoDays(document.getElementById("bento-days-shima").value, year, month);
       const tomariPrice = Math.max(0, Number(document.getElementById("bento-price-tomari").value) || 0);
       const sosodoPrice = Math.max(0, Number(document.getElementById("bento-price-sosodo").value) || 0);
       const manualBentoDaysInput = document.getElementById("manual-bento-days").value;
@@ -583,6 +1166,12 @@ if (typeof document !== "undefined") {
         {
           tomari: tomariName,
           sosodo: sosodoName,
+          shima: shimaName,
+          schedule: {
+            [tomariName]: tomariDays,
+            [sosodoName]: sosodoDays,
+            [shimaName]: shimaDays
+          },
           prices: {
             [tomariName]: tomariPrice,
             [sosodoName]: sosodoPrice
@@ -601,9 +1190,23 @@ if (typeof document !== "undefined") {
       printSection("all");
     });
 
+    document.getElementById("monthly-menu").addEventListener("click", handleRecipeButtonClick);
+    document.getElementById("recipe-close").addEventListener("click", closeRecipeDialog);
+    document.getElementById("recipe-dialog").addEventListener("click", (event) => {
+      if (event.target.id === "recipe-dialog") {
+        closeRecipeDialog();
+      }
+    });
+
     renderPlan(today.getFullYear(), today.getMonth() + 1, {
       tomari: "とまりのお弁当",
       sosodo: "そそどのお弁当",
+      shima: "島ばあちゃんのお弁当",
+      schedule: {
+        "とまりのお弁当": [],
+        "そそどのお弁当": [],
+        "島ばあちゃんのお弁当": []
+      },
       prices: {
         "とまりのお弁当": 500,
         "そそどのお弁当": 500
@@ -625,6 +1228,7 @@ function createSide(name, ingredients) {
 
 function renderPlan(year, month, bentoNames, kidsCount, adultCount, manualBentoConfig = { days: [], name: "持っていくお弁当" }) {
   const plan = generateMonthlyPlan(year, month, bentoNames, kidsCount, adultCount, manualBentoConfig);
+  renderedDays = plan.days;
   renderSummary(plan, bentoNames, manualBentoConfig);
   renderMonthlyMenu(plan.days);
   renderWeeklyShopping(plan.weeks);
@@ -718,7 +1322,7 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
       );
       const manualBento = composePackedMeal(
         renameMeal(
-          pickMeal(bentoOptions, usage.bento, meals, previousDayType, "", []),
+          pickMeal(bentoOptions.filter(isRiceBasedBentoMeal), usage.bento, meals, previousDayType, "", []),
           manualBentoName
         ),
         firstBentoSide,
@@ -732,11 +1336,11 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
     }
 
     let dinner;
-    if (isWeekend && shouldUseBento(date, days)) {
-      const bentoName = pickBentoName(date, bentoNames);
+    const scheduledBentoName = pickScheduledBentoName(day, bentoNames);
+    if (scheduledBentoName) {
       dinner = {
-        ...createMeal(bentoName, "購入するごはん", ["お弁当", "付け合わせ", "汁物はなし"], {}),
-        estimatedCost: estimateBentoCost(bentoName, bentoNames),
+        ...createMeal(scheduledBentoName, "", [], {}),
+        estimatedCost: estimateBentoCost(scheduledBentoName, bentoNames),
         estimatedItemCount: 1
       };
     } else {
@@ -778,8 +1382,15 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
 }
 
 function composeMeal(mainMeal, sideDish, soupDish, kidsCount, adultCount) {
+  const condiments = getCondimentIngredientsForDishes([mainMeal.dishes[0], sideDish.name, soupDish.name]);
+  const servingMultiplier = getServingMultiplier(kidsCount, adultCount);
   const ingredients = scaleIngredientMap(
-    mergeIngredientMaps(mainMeal.ingredients, sideDish.ingredients, soupDish.ingredients),
+    mergeIngredientMaps(
+      removeDuplicateCondimentIngredients(mainMeal.ingredients, condiments),
+      removeDuplicateCondimentIngredients(sideDish.ingredients, condiments),
+      removeDuplicateCondimentIngredients(soupDish.ingredients, condiments),
+      condiments
+    ),
     kidsCount,
     adultCount
   );
@@ -788,14 +1399,22 @@ function composeMeal(mainMeal, sideDish, soupDish, kidsCount, adultCount) {
     ...mainMeal,
     dishes: [mainMeal.dishes[0], sideDish.name, soupDish.name],
     ingredients,
+    servingMultiplier,
     estimatedCost: estimate.total,
     estimatedItemCount: estimate.count
   };
 }
 
 function composePackedMeal(mainMeal, sideDish, extraSideDish, kidsCount, adultCount) {
+  const condiments = getCondimentIngredientsForDishes([...mainMeal.dishes, sideDish.name, extraSideDish.name]);
+  const servingMultiplier = getServingMultiplier(kidsCount, adultCount);
   const ingredients = scaleIngredientMap(
-    mergeIngredientMaps(mainMeal.ingredients, sideDish.ingredients, extraSideDish.ingredients),
+    mergeIngredientMaps(
+      removeDuplicateCondimentIngredients(mainMeal.ingredients, condiments),
+      removeDuplicateCondimentIngredients(sideDish.ingredients, condiments),
+      removeDuplicateCondimentIngredients(extraSideDish.ingredients, condiments),
+      condiments
+    ),
     kidsCount,
     adultCount
   );
@@ -804,9 +1423,29 @@ function composePackedMeal(mainMeal, sideDish, extraSideDish, kidsCount, adultCo
     ...mainMeal,
     dishes: [...mainMeal.dishes, sideDish.name, extraSideDish.name],
     ingredients,
+    servingMultiplier,
     estimatedCost: estimate.total,
     estimatedItemCount: estimate.count
   };
+}
+
+function removeDuplicateCondimentIngredients(ingredients, condiments) {
+  if (!ingredients || !condiments) {
+    return ingredients;
+  }
+
+  return Object.fromEntries(
+    Object.entries(ingredients).filter(([name]) => !(name in condiments))
+  );
+}
+
+function getServingMultiplier(kidsCount, adultCount) {
+  return ((kidsCount * 0.8) + adultCount) / 2;
+}
+
+function isRiceBasedBentoMeal(meal) {
+  const dishes = meal?.dishes || [];
+  return !dishes.some((dish) => /(パスタ|スパゲッティ|うどん|そば|焼きそば|麺)/.test(dish));
 }
 
 function shouldUseBento(date, existingDays) {
@@ -911,7 +1550,7 @@ function mergeIngredientMaps(...sources) {
   const merged = {};
   sources.forEach((source) => {
     Object.entries(source).forEach(([name, quantity]) => {
-      merged[name] = mergeQuantity(merged[name], quantity);
+      merged[name] = mergeQuantity(merged[name], normalizeQuantity(name, quantity));
     });
   });
   return merged;
@@ -959,7 +1598,7 @@ function getPrimaryTypesForDay(meals) {
 
 function addIngredients(target, source) {
   Object.entries(source).forEach(([name, quantity]) => {
-    target[name] = mergeQuantity(target[name], quantity);
+    target[name] = mergeQuantity(target[name], normalizeQuantity(name, quantity));
   });
 }
 
@@ -973,15 +1612,113 @@ function mergeQuantity(existing, incoming) {
     return incoming;
   }
 
-  const existingMatch = existing.match(/^(\d+(?:\.\d+)?)(.*)$/);
-  const incomingMatch = incoming.match(/^(\d+(?:\.\d+)?)(.*)$/);
-
-  if (!existingMatch || !incomingMatch || existingMatch[2] !== incomingMatch[2]) {
-    return `${existing} + ${incoming}`;
+  const combined = simplifyQuantityExpression([existing, incoming]);
+  if (combined) {
+    return combined;
   }
 
-  const total = Number(existingMatch[1]) + Number(incomingMatch[1]);
-  return `${trimNumber(total)}${existingMatch[2]}`;
+  return `${existing} + ${incoming}`;
+}
+
+function isApproximateQuantity(quantity) {
+  return quantity === "少々" || quantity === "適量";
+}
+
+function simplifyQuantityExpression(parts) {
+  const tokens = parts
+    .flatMap((part) => String(part).split("+"))
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (tokens.length === 0) {
+    return "";
+  }
+
+  const numericParts = [];
+  let approximateOnly = true;
+
+  for (const token of tokens) {
+    if (isApproximateQuantity(token)) {
+      continue;
+    }
+
+    approximateOnly = false;
+    const match = normalizeQuantityText(token).match(/^(\d+(?:\.\d+)?)(.*)$/);
+    if (!match) {
+      return null;
+    }
+
+    numericParts.push({
+      value: Number(match[1]),
+      unit: normalizeUnitLabel(match[2])
+    });
+  }
+
+  if (approximateOnly) {
+    return "適量";
+  }
+
+  if (numericParts.length === 0) {
+    return null;
+  }
+
+  const [first, ...rest] = numericParts;
+  if (rest.some((part) => part.unit !== first.unit)) {
+    return null;
+  }
+
+  const total = numericParts.reduce((sum, part) => sum + part.value, 0);
+  return `${trimNumber(total)}${first.unit}`;
+}
+
+function normalizeUnitLabel(unit) {
+  const normalized = String(unit || "").trim().toLowerCase();
+  const unitMap = {
+    "g": "g",
+    "ｇ": "g",
+    "グラム": "g",
+    "gram": "g",
+    "grams": "g",
+    "ml": "ml",
+    "ｍｌ": "ml",
+    "cc": "ml",
+    "milliliter": "ml",
+    "milliliters": "ml",
+    "l": "L",
+    "ℓ": "L",
+    "ｌ": "L",
+    "cm": "cm",
+    "ｃｍ": "cm",
+    "個": "個",
+    "こ": "個",
+    "コ": "個",
+    "ヶ": "個",
+    "片": "個",
+    "袋": "袋",
+    "パック": "パック",
+    "pkg": "パック",
+    "箱": "箱",
+    "本": "本",
+    "枚": "枚",
+    "束": "束",
+    "缶": "缶",
+    "瓶": "瓶",
+    "丁": "丁",
+    "株": "株",
+    "切れ": "切れ",
+    "玉": "玉",
+    "食分": "食分",
+    "皿分": "皿分",
+    "合": "合"
+  };
+
+  return unitMap[normalized] || unit;
+}
+
+function normalizeQuantityText(quantity) {
+  return String(quantity || "")
+    .replace(/[０-９．]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 65248))
+    .replace(/\s+/g, "");
 }
 
 function trimNumber(value) {
@@ -1002,14 +1739,15 @@ function normalizeQuantity(name, quantity) {
     return quantity;
   }
 
-  const match = quantity.match(/^(\d+(?:\.\d+)?)(.*)$/);
+  const normalizedQuantity = normalizeQuantityText(quantity);
+  const match = normalizedQuantity.match(/^(\d+(?:\.\d+)?)(.*)$/);
   if (!match) {
     return quantity;
   }
 
   const amount = Number(match[1]);
-  const unit = match[2];
-  if (unit !== guide.fromUnit) {
+  const unit = normalizeUnitLabel(match[2]);
+  if (unit !== normalizeUnitLabel(guide.fromUnit)) {
     return quantity;
   }
 
@@ -1067,6 +1805,16 @@ function parseManualBentoDays(input, year, month) {
   )].sort((a, b) => a - b);
 }
 
+function parseScheduledBentoDays(input, year, month) {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  return [...new Set(
+    String(input || "")
+      .split(/[,\s、]+/)
+      .map((value) => Number(value.trim()))
+      .filter((value) => Number.isInteger(value) && value >= 1 && value <= daysInMonth)
+  )].sort((a, b) => a - b);
+}
+
 function isManualBentoWeekday(year, month, day, daysInMonth = new Date(year, month, 0).getDate()) {
   if (!Number.isInteger(day) || day < 1 || day > daysInMonth) {
     return false;
@@ -1078,6 +1826,12 @@ function isManualBentoWeekday(year, month, day, daysInMonth = new Date(year, mon
 
 function createManualBentoMeal(name, kidsCount, adultCount) {
   return createMeal(name, "持参するお弁当", ["お弁当を準備"], {});
+}
+
+function pickScheduledBentoName(day, bentoNames) {
+  const scheduleEntries = Object.entries(bentoNames.schedule || {});
+  const matched = scheduleEntries.find(([, days]) => Array.isArray(days) && days.includes(day));
+  return matched ? matched[0] : null;
 }
 
 function renameMeal(meal, name) {
@@ -1108,10 +1862,11 @@ function getSeason(month) {
 function renderSummary(plan, bentoNames, manualBentoConfig) {
   const weekends = plan.days.filter((day) => day.isWeekend).length;
   const bentoCount = plan.days.filter((day) => day.meals.some((meal) =>
-    meal.name === bentoNames.tomari || meal.name === bentoNames.sosodo
+    meal.name === bentoNames.tomari || meal.name === bentoNames.sosodo || meal.name === bentoNames.shima
   )).length;
   const tomariCount = plan.days.filter((day) => day.meals.some((meal) => meal.name === bentoNames.tomari)).length;
   const sosodoCount = plan.days.filter((day) => day.meals.some((meal) => meal.name === bentoNames.sosodo)).length;
+  const shimaCount = plan.days.filter((day) => day.meals.some((meal) => meal.name === bentoNames.shima)).length;
   const tomariCost = (bentoNames.prices?.[bentoNames.tomari] || 0) * tomariCount;
   const sosodoCost = (bentoNames.prices?.[bentoNames.sosodo] || 0) * sosodoCount;
   const manualBentoCount = plan.days.filter((day) => day.meals.some((meal) =>
@@ -1126,7 +1881,7 @@ function renderSummary(plan, bentoNames, manualBentoConfig) {
   }[plan.season];
 
   document.getElementById("summary-text").textContent =
-    `${plan.year}年${plan.month}月は 子ども${plan.kidsCount}人・大人${plan.adultCount}人の${seasonLabel}向けで ${plan.days.length}日分の献立を作成しました。土日 ${weekends}日、${bentoNames.tomari} は ${tomariCount}回で ${formatCurrency(tomariCost)}、${bentoNames.sosodo} は ${sosodoCount}回で ${formatCurrency(sosodoCost)}、購入弁当は合計 ${bentoCount}回、指定したお弁当日は ${manualBentoCount}日、月の食費目安は ${formatCurrency(monthlyEstimate)} です。`;
+    `${plan.year}年${plan.month}月は 子ども${plan.kidsCount}人・大人${plan.adultCount}人の${seasonLabel}向けで ${plan.days.length}日分の献立を作成しました。土日 ${weekends}日、${bentoNames.tomari} は ${tomariCount}回で ${formatCurrency(tomariCost)}、${bentoNames.sosodo} は ${sosodoCount}回で ${formatCurrency(sosodoCost)}、${bentoNames.shima} は ${shimaCount}回、購入弁当は合計 ${bentoCount}回、指定したお弁当日は ${manualBentoCount}日、月の食費目安は ${formatCurrency(monthlyEstimate)} です。`;
 }
 
 function renderMonthlyMenu(days) {
@@ -1134,13 +1889,14 @@ function renderMonthlyMenu(days) {
   root.innerHTML = "";
 
   days.forEach((day) => {
-    const mealsHtml = day.meals.map((meal) => `
+    const mealsHtml = day.meals.map((meal, mealIndex) => `
       <div class="meal-item">
         <div class="meal-slot">${meal.slot}</div>
         <div>
           <div class="meal-name">${meal.name}</div>
-          <div class="meal-note">${meal.dishes.join(" / ")}</div>
-          <div class="meal-note">${meal.note}</div>
+          ${meal.dishes && meal.dishes.length ? `<div class="meal-note">${meal.dishes.join(" / ")}</div>` : ""}
+          ${meal.note ? `<div class="meal-note">${meal.note}</div>` : ""}
+          ${Object.keys(meal.ingredients || {}).length > 0 ? `<button type="button" class="recipe-button" data-day="${day.day}" data-meal-index="${mealIndex}">作り方を見る</button>` : ""}
         </div>
       </div>
     `).join("");
@@ -1334,6 +2090,182 @@ function printShoppingWeek(weekLabel) {
   weekCards.forEach((card) => {
     card.classList.remove("print-hidden");
   });
+}
+
+function handleRecipeButtonClick(event) {
+  const button = event.target.closest(".recipe-button");
+  if (!button) {
+    return;
+  }
+
+  const day = renderedDays.find((item) => item.day === Number(button.dataset.day));
+  const meal = day?.meals?.[Number(button.dataset.mealIndex)];
+  if (!meal) {
+    return;
+  }
+
+  openRecipeDialog(meal);
+}
+
+function openRecipeDialog(meal) {
+  const dialog = document.getElementById("recipe-dialog");
+  const recipes = getRecipesForMeal(meal);
+  document.getElementById("recipe-title").textContent = meal.name;
+  document.getElementById("recipe-subtitle").textContent = `${meal.slot}ごはんの作り方`;
+  document.getElementById("recipe-ingredients").innerHTML = Object.entries(meal.ingredients)
+    .map(([name, quantity]) => `<div class="recipe-ingredient-item"><span>${name}</span><span>${quantity}</span></div>`)
+    .join("");
+  document.getElementById("recipe-sections").innerHTML = recipes.map((recipe) => `
+    <article class="recipe-section-card">
+      <h4>${recipe.title}</h4>
+      <div class="recipe-section-label">調味料</div>
+      <div class="recipe-condiments-list recipe-condiments-grid">
+        ${Object.entries(recipe.condiments).map(([name, quantity]) => `<div class="recipe-ingredient-item"><span>${name}</span><span>${quantity}</span></div>`).join("")}
+      </div>
+      <div class="recipe-section-label">作り方</div>
+      <ol class="recipe-steps">
+        ${recipe.steps.map((step) => `<li>${step}</li>`).join("")}
+      </ol>
+    </article>
+  `).join("");
+
+  if (typeof dialog.showModal === "function") {
+    dialog.showModal();
+  } else {
+    dialog.setAttribute("open", "open");
+  }
+}
+
+function closeRecipeDialog() {
+  const dialog = document.getElementById("recipe-dialog");
+  if (typeof dialog.close === "function") {
+    dialog.close();
+  } else {
+    dialog.removeAttribute("open");
+  }
+}
+
+function getRecipesForMeal(meal) {
+  const dishes = (meal.dishes || [])
+    .filter((dish) => dish && !preparedDishNames.has(dish) && dish !== "ごはん" && dish !== "のりごはん")
+    .filter((dish, index, list) => list.indexOf(dish) === index);
+
+  if (dishes.length === 0) {
+    return [{
+      title: meal.name,
+      condiments: scaleCondimentMap(normalizeCondiments(["塩", "こしょう", "醤油"]), meal.servingMultiplier || 1),
+      steps: [
+        "必要な料理を温めるか準備する。",
+        "食べる順に盛り付ける。",
+        "全体のバランスを見て仕上げる。"
+      ]
+    }];
+  }
+
+  return dishes.map((dish) => {
+    const recipe = getRecipeForDish(dish, meal);
+    return {
+      ...recipe,
+      condiments: scaleCondimentMap(recipe.condiments, meal.servingMultiplier || 1)
+    };
+  });
+}
+
+function getRecipeForDish(dish, meal) {
+  if (fullRecipeCatalog[dish]) {
+    return {
+      title: dish,
+      steps: fullRecipeCatalog[dish].steps,
+      condiments: normalizeCondiments(fullRecipeCatalog[dish].condiments)
+    };
+  }
+
+  if (dish.includes("丼")) {
+    return {
+      title: dish,
+      condiments: normalizeCondiments(["醤油", "みりん", "砂糖"]),
+      steps: [
+        "具材を食べやすく切って火を通す。",
+        "味付けして汁気を整える。",
+        "ごはんにのせて仕上げる。"
+      ]
+    };
+  }
+
+  if (dish.includes("うどん") || dish.includes("そば") || dish.includes("パスタ")) {
+    return {
+      title: dish,
+      condiments: normalizeCondiments(["塩", "こしょう", "コンソメ"]),
+      steps: [
+        "麺を表示通りにゆでる。",
+        "具材やソースを別に用意して温める。",
+        "麺と合わせて盛り付ける。"
+      ]
+    };
+  }
+
+  return {
+    title: dish,
+    condiments: normalizeCondiments(getFallbackCondiments(meal, dish)),
+    steps: [
+      "材料を食べやすく切って用意する。",
+      "フライパンや鍋で火を通しながら味を整える。",
+      "器に盛り付けて仕上げる。"
+    ]
+  };
+}
+
+function getFallbackCondiments(meal, primaryDish) {
+  if (primaryDish.includes("味噌汁")) {
+    return ["味噌", "だし"];
+  }
+  if (primaryDish.includes("スープ")) {
+    return ["コンソメ または 鶏がらスープの素", "塩", "こしょう"];
+  }
+  if (primaryDish.includes("焼き") || primaryDish.includes("炒め")) {
+    return ["塩", "こしょう", "醤油"];
+  }
+  if (primaryDish.includes("鍋") || primaryDish.includes("スープ")) {
+    return ["だし", "塩", "醤油"];
+  }
+  if (primaryDish.includes("揚げ") || primaryDish.includes("フライ") || primaryDish.includes("コロッケ")) {
+    return ["塩", "中濃ソース"];
+  }
+  if (meal.note.includes("パン") || meal.note.includes("朝食")) {
+    return ["塩", "こしょう", "バター"];
+  }
+  return ["塩", "こしょう", "醤油"];
+}
+
+function normalizeCondiments(condiments) {
+  return (condiments || []).reduce((accumulator, name) => {
+    const normalizedName = condimentAliasGuide[name] || name;
+    const quantity = condimentAmountGuide[normalizedName] || "少々";
+    accumulator[normalizedName] = mergeQuantity(accumulator[normalizedName], quantity);
+    return accumulator;
+  }, {});
+}
+
+function scaleCondimentMap(condiments, multiplier) {
+  const scaled = {};
+  Object.entries(condiments || {}).forEach(([name, quantity]) => {
+    scaled[name] = scaleQuantity(quantity, multiplier);
+  });
+  return scaled;
+}
+
+function getCondimentIngredientsForDishes(dishes) {
+  return (dishes || []).reduce((accumulator, dish) => {
+    if (!dish || preparedDishNames.has(dish) || dish === "ごはん" || dish === "のりごはん") {
+      return accumulator;
+    }
+
+    const recipe = getRecipeForDish(dish, { note: "", slot: "" });
+    Object.entries(recipe.condiments).forEach(([name, quantity]) => {
+      accumulator[name] = mergeQuantity(accumulator[name], quantity);
+    });
+    return accumulator;
+  }, {});
 }
 
 if (typeof module !== "undefined") {

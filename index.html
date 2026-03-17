@@ -9,55 +9,112 @@
 <body>
   <main class="app">
     <section class="hero">
-      <div>
+      <div class="hero-copy">
         <p class="eyebrow">Monthly Menu Planner</p>
         <h1>献立AI</h1>
         <p class="lead">平日は朝と夜、土日は3食。月間の献立と週ごとの買い物リストをまとめて作ります。</p>
       </div>
-      <form id="menu-form" class="controls">
-        <label>
-          対象の年
-          <input id="year" type="number" min="2024" max="2100" required>
-        </label>
-        <label>
-          対象の月
-          <input id="month" type="number" min="1" max="12" required>
-        </label>
-        <label>
-          子どもの人数
-          <input id="kids-count" type="number" min="0" max="20" value="2" required>
-        </label>
-        <label>
-          大人の人数
-          <input id="adult-count" type="number" min="0" max="20" value="1" required>
-        </label>
-        <label>
-          お弁当名1
-          <input id="bento-name-tomari" type="text" value="とまりのお弁当" required>
-        </label>
-        <label>
-          お弁当名1の金額
-          <input id="bento-price-tomari" type="number" min="0" step="1" value="500" required>
-        </label>
-        <label>
-          お弁当名2
-          <input id="bento-name-sosodo" type="text" value="そそどのお弁当" required>
-        </label>
-        <label>
-          お弁当名2の金額
-          <input id="bento-price-sosodo" type="number" min="0" step="1" value="500" required>
-        </label>
-        <label>
-          お弁当の日
-          <input id="manual-bento-days" type="text" placeholder="例: 5, 12, 21（平日のみ）">
-        </label>
-        <label>
-          追加するお弁当名
-          <input id="manual-bento-name" type="text" value="持っていくお弁当">
-        </label>
-        <button type="submit">献立を作る</button>
-      </form>
     </section>
+
+    <form id="menu-form" class="controls">
+      <section class="form-section">
+        <div class="form-section-head">
+          <p class="section-kicker">Basic</p>
+          <h3>基本設定</h3>
+        </div>
+        <div class="form-grid form-grid-compact">
+          <label>
+            対象の年
+            <input id="year" type="number" min="2024" max="2100" required>
+          </label>
+          <label>
+            対象の月
+            <input id="month" type="number" min="1" max="12" required>
+          </label>
+          <label>
+            子どもの人数
+            <input id="kids-count" type="number" min="0" max="20" value="2" required>
+          </label>
+          <label>
+            大人の人数
+            <input id="adult-count" type="number" min="0" max="20" value="1" required>
+          </label>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="form-section-head">
+          <p class="section-kicker">Bento Schedule</p>
+          <h3>お店のお弁当</h3>
+        </div>
+        <div class="person-grid">
+          <div class="person-card">
+            <h4>とまり</h4>
+            <label>
+              表示名
+              <input id="bento-name-tomari" type="text" value="とまりのお弁当" required>
+            </label>
+            <label>
+              日にち
+              <input id="bento-days-tomari" type="text" placeholder="例: 4, 18, 26">
+            </label>
+            <label>
+              金額
+              <input id="bento-price-tomari" type="number" min="0" step="1" value="500" required>
+            </label>
+          </div>
+
+          <div class="person-card">
+            <h4>そそど</h4>
+            <label>
+              表示名
+              <input id="bento-name-sosodo" type="text" value="そそどのお弁当" required>
+            </label>
+            <label>
+              日にち
+              <input id="bento-days-sosodo" type="text" placeholder="例: 6, 20">
+            </label>
+            <label>
+              金額
+              <input id="bento-price-sosodo" type="number" min="0" step="1" value="500" required>
+            </label>
+          </div>
+
+          <div class="person-card">
+            <h4>島ばあちゃん</h4>
+            <label>
+              表示名
+              <input id="bento-name-shima" type="text" value="島ばあちゃんのお弁当" required>
+            </label>
+            <label>
+              日にち
+              <input id="bento-days-shima" type="text" placeholder="例: 10, 24">
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <div class="form-section-head">
+          <p class="section-kicker">Weekday Bento</p>
+          <h3>平日のお弁当</h3>
+        </div>
+        <div class="form-grid form-grid-compact">
+          <label>
+            お弁当の日
+            <input id="manual-bento-days" type="text" placeholder="例: 5, 12, 21（平日のみ）">
+          </label>
+          <label>
+            追加するお弁当名
+            <input id="manual-bento-name" type="text" value="持っていくお弁当">
+          </label>
+        </div>
+      </section>
+
+      <div class="form-actions">
+        <button type="submit">献立を作る</button>
+      </div>
+    </form>
 
     <section class="summary">
       <div class="card">
@@ -65,7 +122,7 @@
         <ul>
           <li>平日: 朝ごはん、夕ごはん</li>
           <li>土日: 朝ごはん、昼ごはん、夕ごはん</li>
-          <li>土曜か日曜の夕ごはんに週1回、「とまり」か「そそど」のお弁当を入れる</li>
+          <li>とまり / そそど / 島ばあちゃん のお弁当日は日付指定で入れられる</li>
           <li>指定した平日は「お弁当の日」として反映できる</li>
           <li>1週間ごとに必要食材を集計する</li>
           <li>週ごとの買い物金額の目安も表示する</li>
@@ -95,6 +152,24 @@
 
     <section id="weekly-print-pages" class="weekly-print-pages" aria-hidden="true"></section>
   </main>
+
+  <dialog id="recipe-dialog" class="recipe-dialog">
+    <div class="recipe-dialog-head">
+      <h2 id="recipe-title">作り方</h2>
+      <button type="button" id="recipe-close" class="print-button">閉じる</button>
+    </div>
+    <p id="recipe-subtitle" class="recipe-subtitle"></p>
+    <div class="recipe-columns">
+      <section>
+        <h3>材料</h3>
+        <div id="recipe-ingredients" class="recipe-ingredients"></div>
+      </section>
+      <section>
+        <h3>料理ごとの作り方</h3>
+        <div id="recipe-sections" class="recipe-sections"></div>
+      </section>
+    </div>
+  </dialog>
 
   <script src="app.js"></script>
 </body>

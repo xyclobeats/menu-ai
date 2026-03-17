@@ -30,10 +30,11 @@ body {
 }
 
 .hero {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 20px;
-  align-items: stretch;
+  margin-bottom: 20px;
+}
+
+.hero-copy {
+  max-width: 64rem;
 }
 
 .eyebrow {
@@ -77,8 +78,10 @@ h1 {
 
 .controls {
   display: grid;
-  gap: 12px;
+  gap: 16px;
   padding: 20px;
+  align-content: start;
+  margin-top: 0;
 }
 
 .controls label {
@@ -107,6 +110,61 @@ h1 {
   color: #fff8f0;
   font-weight: 700;
   cursor: pointer;
+}
+
+.form-section {
+  padding: 16px;
+  border: 1px solid rgba(221, 207, 191, 0.9);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.form-section-head {
+  margin-bottom: 12px;
+}
+
+.form-section-head h3,
+.person-card h4 {
+  margin-bottom: 0;
+}
+
+.section-kicker {
+  margin-bottom: 4px;
+  color: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.form-grid-compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.person-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.person-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid rgba(221, 207, 191, 0.95);
+  border-radius: 16px;
+  background: #fffdf8;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .print-button {
@@ -151,6 +209,7 @@ h1 {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 14px;
+  gap: 12px;
 }
 
 .monthly-menu {
@@ -222,6 +281,17 @@ h1 {
   margin-top: 4px;
 }
 
+.recipe-button {
+  margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.86rem;
+  cursor: pointer;
+}
+
 .weekly-shopping {
   display: grid;
   gap: 14px;
@@ -232,6 +302,13 @@ h1 {
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 16px;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.week-card:hover,
+.day-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(85, 55, 35, 0.08);
 }
 
 .week-head {
@@ -374,8 +451,92 @@ h1 {
   margin-top: 4px;
 }
 
+.recipe-dialog {
+  width: min(760px, calc(100% - 24px));
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.recipe-dialog::backdrop {
+  background: rgba(42, 36, 29, 0.45);
+}
+
+.recipe-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.recipe-subtitle {
+  color: var(--muted);
+}
+
+.recipe-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr);
+  gap: 16px;
+}
+
+.recipe-ingredients,
+.recipe-sections,
+.recipe-steps {
+  display: grid;
+  gap: 8px;
+}
+
+.recipe-ingredient-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fbf6ef;
+}
+
+.recipe-section-card {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fffaf2;
+}
+
+.recipe-section-card h4 {
+  margin: 0 0 8px;
+}
+
+.recipe-section-label {
+  margin: 8px 0 6px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.recipe-condiments-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.recipe-condiments-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.recipe-condiment-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #f4e5d8;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 @media (max-width: 900px) {
-  .hero,
   .summary,
   .results {
     grid-template-columns: 1fr;
@@ -383,6 +544,12 @@ h1 {
 
   .week-head {
     flex-direction: column;
+  }
+
+  .form-grid,
+  .form-grid-compact,
+  .person-grid {
+    grid-template-columns: 1fr;
   }
 
   .week-actions {
@@ -393,6 +560,10 @@ h1 {
   .week-cost {
     width: 100%;
     text-align: left;
+  }
+
+  .recipe-columns {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -408,7 +579,9 @@ h1 {
 
   .hero,
   .summary,
-  .print-button {
+  .print-button,
+  .recipe-button,
+  .recipe-dialog {
     display: none !important;
   }
 
