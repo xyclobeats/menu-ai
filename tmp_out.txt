@@ -1,0 +1,47 @@
+{
+  "days": 31,
+  "weeks": 6,
+  "kidsCount": 4,
+  "adultCount": 1,
+  "bento": 3,
+  "tomariBento": 2,
+  "sosodoBento": 1,
+  "shimaBento": 1,
+  "curry": 1,
+  "stew": 1,
+  "manualBentoDays": [
+    3,
+    12
+  ],
+  "manualBento": [
+    {
+      "day": 3,
+      "slots": [
+        "弁当"
+      ],
+      "dishes": [
+        "唐揚げ",
+        "ごはん",
+        "ブロッコリーのおかか和え",
+        "きんぴらごぼう"
+      ],
+      "estimatedCost": 1589
+    },
+    {
+      "day": 12,
+      "slots": [
+        "弁当"
+      ],
+      "dishes": [
+        "焼き鮭",
+        "のりごはん",
+        "卵焼き",
+        "ポテトサラダ"
+      ],
+      "estimatedCost": 1583
+    }
+  ],
+  "manualBentoMonthlyEstimatedCost": 94426,
+  "firstWeekEstimatedCost": 8385,
+  "monthlyEstimatedCost": 145864
+}

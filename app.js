@@ -1,6 +1,33 @@
 let quantityNormalizationGuide = {};
 let ingredientPriceGuide = {};
 let renderedDays = [];
+const FORM_STORAGE_KEY = "menu-ai-form-state";
+const GENERATED_PLAN_STORAGE_KEY = "menu-ai-generated-config";
+const FORM_FIELD_IDS = [
+  "year",
+  "month",
+  "kids-count",
+  "adult-count",
+  "bento-name-tomari",
+  "bento-days-tomari",
+  "bento-price-tomari",
+  "bento-name-sosodo",
+  "bento-days-sosodo",
+  "bento-price-sosodo",
+  "bento-name-shima",
+  "bento-days-shima",
+  "manual-bento-days",
+  "manual-bento-name",
+  "skip-days",
+  "skip-day-name"
+];
+
+const BASE_SERVING_COUNTS = {
+  kids: 2,
+  adults: 1
+};
+
+const BASE_EQUIVALENT_ADULTS = (BASE_SERVING_COUNTS.kids * 0.8) + BASE_SERVING_COUNTS.adults;
 
 const recipeGuide = {
   "親子丼": ["鶏肉と玉ねぎを食べやすく切る。", "フライパンで鶏肉と玉ねぎを煮て火を通す。", "溶き卵を回し入れて半熟で止め、ごはんにのせる。"],
@@ -501,10 +528,13 @@ const fullRecipeCatalog = {
 const condimentAliasGuide = {
   "しょうゆ": "醤油",
   "だし": "和風だし",
+  "めんつゆ": "めんつゆ",
+  "みりん": "みりん",
   "ごま油": "ごま油",
   "オリーブオイル": "オリーブオイル",
   "マヨネーズ": "マヨネーズ",
   "ケチャップ": "ケチャップ",
+  "ソース": "中濃ソース",
   "中濃ソース": "中濃ソース",
   "焼きそばソース": "焼きそばソース",
   "鶏がらスープの素": "鶏がらスープの素",
@@ -520,6 +550,9 @@ const condimentAliasGuide = {
   "しょうが": "しょうが",
   "コチュジャン": "コチュジャン",
   "タルタルソース": "タルタルソース",
+  "オイスターソース": "オイスターソース",
+  "カレールウ": "カレールウ",
+  "シチュールウ": "シチュールウ",
   "回鍋肉の素": "回鍋肉の素",
   "麻婆豆腐の素": "麻婆豆腐の素",
   "からし": "からし",
@@ -537,6 +570,7 @@ const condimentAmountGuide = {
   "こしょう": "1g",
   "酢": "10ml",
   "和風だし": "400ml",
+  "めんつゆ": "45ml",
   "鶏がらスープの素": "1食分",
   "コンソメ": "1個",
   "ごま油": "5ml",
@@ -545,14 +579,17 @@ const condimentAmountGuide = {
   "すりごま": "12g",
   "ケチャップ": "30g",
   "中濃ソース": "15ml",
+  "オイスターソース": "15ml",
   "焼きそばソース": "30ml",
   "味噌": "36g",
   "片栗粉": "9g",
   "バター": "10g",
   "にんにく": "1片",
-  "しょうが": "1片",
+  "しょうが": "0.2個",
   "コチュジャン": "5g",
   "タルタルソース": "24g",
+  "カレールウ": "4皿分",
+  "シチュールウ": "4皿分",
   "回鍋肉の素": "1箱",
   "麻婆豆腐の素": "1箱",
   "からし": "2g",
@@ -1025,7 +1062,9 @@ quantityNormalizationGuide = {
   "マカロニ": { fromUnit: "袋", toUnit: "g", multiplier: 200 },
   "切り干し大根": { fromUnit: "袋", toUnit: "g", multiplier: 40 },
   "なめこ": { fromUnit: "袋", toUnit: "g", multiplier: 100 },
-  "いんげん": { fromUnit: "袋", toUnit: "g", multiplier: 100 }
+  "いんげん": { fromUnit: "袋", toUnit: "g", multiplier: 100 },
+  "鶏もも肉": { fromUnit: "枚", toUnit: "g", multiplier: 300 },
+  "大根": { fromUnit: "本", toUnit: "g", multiplier: 1000 }
 };
 ingredientPriceGuide = {
   "ごはん": { unit: "合", pricePerUnit: 90 },
@@ -1078,7 +1117,7 @@ ingredientPriceGuide = {
   "豚ロース": { unit: "g", pricePerUnit: 2.3 },
   "しょうが": { unit: "個", pricePerUnit: 120 },
   "サバ": { unit: "切れ", pricePerUnit: 180 },
-  "大根": { unit: "本", pricePerUnit: 200 },
+  "大根": { unit: "g", pricePerUnit: 0.2 },
   "レモン": { unit: "個", pricePerUnit: 130 },
   "豆腐": { unit: "丁", pricePerUnit: 60 },
   "麻婆豆腐の素": { unit: "食分", pricePerUnit: 73.4 },
@@ -1101,6 +1140,7 @@ ingredientPriceGuide = {
   "ちくわ": { unit: "本", pricePerUnit: 30 },
   "ブロッコリー": { unit: "株", pricePerUnit: 220 },
   "コンソメ": { unit: "個", pricePerUnit: 28.8 },
+  "オイスターソース": { unit: "ml", pricePerUnit: 0.72 },
   "ひじき": { unit: "g", pricePerUnit: 5.34 },
   "すりごま": { unit: "g", pricePerUnit: 2.34 },
   "ごぼう": { unit: "本", pricePerUnit: 150 },
@@ -1141,49 +1181,30 @@ ingredientPriceGuide = {
 if (typeof document !== "undefined") {
   document.addEventListener("DOMContentLoaded", () => {
     const today = new Date();
-    document.getElementById("year").value = today.getFullYear();
-    document.getElementById("month").value = today.getMonth() + 1;
+    const defaultConfig = getDefaultPlanConfig(today);
+    const savedFormState = loadStoredJson(FORM_STORAGE_KEY);
+    const savedGeneratedConfig = loadStoredJson(GENERATED_PLAN_STORAGE_KEY);
+
+    document.getElementById("year").value = defaultConfig.year;
+    document.getElementById("month").value = defaultConfig.month;
+    applyFormState(savedFormState);
+    persistCurrentFormState();
 
     document.getElementById("menu-form").addEventListener("submit", (event) => {
       event.preventDefault();
-      const year = Number(document.getElementById("year").value);
-      const month = Number(document.getElementById("month").value);
-      const kidsCount = Math.max(0, Number(document.getElementById("kids-count").value) || 0);
-      const adultCount = Math.max(0, Number(document.getElementById("adult-count").value) || 0);
-      const tomariName = document.getElementById("bento-name-tomari").value.trim() || "とまりのお弁当";
-      const tomariDays = parseScheduledBentoDays(document.getElementById("bento-days-tomari").value, year, month);
-      const sosodoName = document.getElementById("bento-name-sosodo").value.trim() || "そそどのお弁当";
-      const sosodoDays = parseScheduledBentoDays(document.getElementById("bento-days-sosodo").value, year, month);
-      const shimaName = document.getElementById("bento-name-shima").value.trim() || "島ばあちゃんのお弁当";
-      const shimaDays = parseScheduledBentoDays(document.getElementById("bento-days-shima").value, year, month);
-      const tomariPrice = Math.max(0, Number(document.getElementById("bento-price-tomari").value) || 0);
-      const sosodoPrice = Math.max(0, Number(document.getElementById("bento-price-sosodo").value) || 0);
-      const manualBentoDaysInput = document.getElementById("manual-bento-days").value;
-      const manualBentoName = document.getElementById("manual-bento-name").value.trim() || "持っていくお弁当";
-      renderPlan(
-        year,
-        month,
-        {
-          tomari: tomariName,
-          sosodo: sosodoName,
-          shima: shimaName,
-          schedule: {
-            [tomariName]: tomariDays,
-            [sosodoName]: sosodoDays,
-            [shimaName]: shimaDays
-          },
-          prices: {
-            [tomariName]: tomariPrice,
-            [sosodoName]: sosodoPrice
-          }
-        },
-        kidsCount,
-        adultCount,
-        {
-          days: parseManualBentoDays(manualBentoDaysInput, year, month),
-          name: manualBentoName
-        }
-      );
+      const config = buildPlanConfigFromForm();
+      renderPlan(config.year, config.month, config.bentoNames, config.kidsCount, config.adultCount, config.manualBentoConfig);
+      saveStoredJson(GENERATED_PLAN_STORAGE_KEY, config);
+      persistCurrentFormState();
+    });
+
+    FORM_FIELD_IDS.forEach((id) => {
+      const element = document.getElementById(id);
+      if (!element) {
+        return;
+      }
+      element.addEventListener("input", persistCurrentFormState);
+      element.addEventListener("change", persistCurrentFormState);
     });
 
     document.getElementById("print-all").addEventListener("click", () => {
@@ -1198,7 +1219,68 @@ if (typeof document !== "undefined") {
       }
     });
 
-    renderPlan(today.getFullYear(), today.getMonth() + 1, {
+    const initialConfig = isValidPlanConfig(savedGeneratedConfig) ? savedGeneratedConfig : buildPlanConfigFromForm();
+    renderPlan(initialConfig.year, initialConfig.month, initialConfig.bentoNames, initialConfig.kidsCount, initialConfig.adultCount, initialConfig.manualBentoConfig);
+    if (!isValidPlanConfig(savedGeneratedConfig)) {
+      saveStoredJson(GENERATED_PLAN_STORAGE_KEY, initialConfig);
+    }
+  });
+}
+
+function loadStoredJson(key) {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveStoredJson(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Ignore storage failures and keep the app usable.
+  }
+}
+
+function getFormState() {
+  return FORM_FIELD_IDS.reduce((accumulator, id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      accumulator[id] = element.value;
+    }
+    return accumulator;
+  }, {});
+}
+
+function applyFormState(state) {
+  if (!state || typeof state !== "object") {
+    return;
+  }
+
+  FORM_FIELD_IDS.forEach((id) => {
+    if (!(id in state)) {
+      return;
+    }
+    const element = document.getElementById(id);
+    if (element) {
+      element.value = state[id];
+    }
+  });
+}
+
+function persistCurrentFormState() {
+  saveStoredJson(FORM_STORAGE_KEY, getFormState());
+}
+
+function getDefaultPlanConfig(today = new Date()) {
+  return {
+    year: today.getFullYear(),
+    month: today.getMonth() + 1,
+    kidsCount: 2,
+    adultCount: 1,
+    bentoNames: {
       tomari: "とまりのお弁当",
       sosodo: "そそどのお弁当",
       shima: "島ばあちゃんのお弁当",
@@ -1211,11 +1293,77 @@ if (typeof document !== "undefined") {
         "とまりのお弁当": 500,
         "そそどのお弁当": 500
       }
-    }, 2, 1, {
+    },
+    manualBentoConfig: {
       days: [],
-      name: "持っていくお弁当"
-    });
-  });
+      name: "持っていくお弁当",
+      skipDays: [],
+      skipDayName: "お休みの日"
+    }
+  };
+}
+
+function isValidPlanConfig(config) {
+  return Boolean(
+    config &&
+    Number.isInteger(config.year) &&
+    Number.isInteger(config.month) &&
+    config.month >= 1 &&
+    config.month <= 12 &&
+    Number.isFinite(config.kidsCount) &&
+    Number.isFinite(config.adultCount) &&
+    config.bentoNames &&
+    typeof config.bentoNames.tomari === "string" &&
+    typeof config.bentoNames.sosodo === "string" &&
+    typeof config.bentoNames.shima === "string" &&
+    config.manualBentoConfig
+  );
+}
+
+function buildPlanConfigFromForm() {
+  const year = Number(document.getElementById("year").value);
+  const month = Number(document.getElementById("month").value);
+  const kidsCount = Math.max(0, Number(document.getElementById("kids-count").value) || 0);
+  const adultCount = Math.max(0, Number(document.getElementById("adult-count").value) || 0);
+  const tomariName = document.getElementById("bento-name-tomari").value.trim() || "とまりのお弁当";
+  const tomariDays = parseScheduledBentoDays(document.getElementById("bento-days-tomari").value, year, month);
+  const sosodoName = document.getElementById("bento-name-sosodo").value.trim() || "そそどのお弁当";
+  const sosodoDays = parseScheduledBentoDays(document.getElementById("bento-days-sosodo").value, year, month);
+  const shimaName = document.getElementById("bento-name-shima").value.trim() || "島ばあちゃんのお弁当";
+  const shimaDays = parseScheduledBentoDays(document.getElementById("bento-days-shima").value, year, month);
+  const tomariPrice = Math.max(0, Number(document.getElementById("bento-price-tomari").value) || 0);
+  const sosodoPrice = Math.max(0, Number(document.getElementById("bento-price-sosodo").value) || 0);
+  const manualBentoDaysInput = document.getElementById("manual-bento-days").value;
+  const manualBentoName = document.getElementById("manual-bento-name").value.trim() || "持っていくお弁当";
+  const skipDaysInput = document.getElementById("skip-days").value;
+  const skipDayName = document.getElementById("skip-day-name").value.trim() || "お休みの日";
+
+  return {
+    year,
+    month,
+    kidsCount,
+    adultCount,
+    bentoNames: {
+      tomari: tomariName,
+      sosodo: sosodoName,
+      shima: shimaName,
+      schedule: {
+        [tomariName]: tomariDays,
+        [sosodoName]: sosodoDays,
+        [shimaName]: shimaDays
+      },
+      prices: {
+        [tomariName]: tomariPrice,
+        [sosodoName]: sosodoPrice
+      }
+    },
+    manualBentoConfig: {
+      days: parseManualBentoDays(manualBentoDaysInput, year, month),
+      name: manualBentoName,
+      skipDays: parseFlexibleMonthDays(skipDaysInput, year, month),
+      skipDayName
+    }
+  };
 }
 
 function createMeal(name, note, dishes, ingredients) {
@@ -1226,16 +1374,16 @@ function createSide(name, ingredients) {
   return { name, ingredients: normalizeIngredientMap(ingredients) };
 }
 
-function renderPlan(year, month, bentoNames, kidsCount, adultCount, manualBentoConfig = { days: [], name: "持っていくお弁当" }) {
+function renderPlan(year, month, bentoNames, kidsCount, adultCount, manualBentoConfig = { days: [], name: "持っていくお弁当", skipDays: [], skipDayName: "お休みの日" }) {
   const plan = generateMonthlyPlan(year, month, bentoNames, kidsCount, adultCount, manualBentoConfig);
   renderedDays = plan.days;
   renderSummary(plan, bentoNames, manualBentoConfig);
   renderMonthlyMenu(plan.days);
-  renderWeeklyShopping(plan.weeks);
+  renderWeeklyShopping(plan.fortnights);
   renderWeeklyPrintPages(plan);
 }
 
-function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount = 1, manualBentoConfig = { days: [], name: "持っていくお弁当" }) {
+function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount = 1, manualBentoConfig = { days: [], name: "持っていくお弁当", skipDays: [], skipDayName: "お休みの日" }) {
   const daysInMonth = new Date(year, month, 0).getDate();
   const days = [];
   const weeks = [];
@@ -1245,7 +1393,10 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
     (manualBentoConfig.days || []).filter((day) => isManualBentoWeekday(year, month, day, daysInMonth))
   );
   const manualBentoName = manualBentoConfig.name || "持っていくお弁当";
-  const specialMonthlyMeal = pickMonthlySpecial(year, month);
+  const skipDays = new Set(
+    (manualBentoConfig.skipDays || []).filter((day) => Number.isInteger(day) && day >= 1 && day <= daysInMonth)
+  );
+  const skipDayName = manualBentoConfig.skipDayName || "お休みの日";
   const usage = {
     breakfast: new Map(),
     lunch: new Map(),
@@ -1282,8 +1433,22 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
     }
 
     const meals = [];
+    if (skipDays.has(day)) {
+      meals.push(createSkipDayMeal(skipDayName));
+      days.push({
+        date,
+        day,
+        weekday,
+        isWeekend,
+        weekLabel: currentWeek.label,
+        meals
+      });
+      previousDayType = getPrimaryTypesForDay(meals);
+      continue;
+    }
+
     const breakfast = composeMeal(
-      pickMeal(breakfastOptions, usage.breakfast, meals, null, "", seasonPref.breakfast),
+      pickMeal(breakfastOptions, usage.breakfast, meals, days, null, "", seasonPref.breakfast),
       pickComponent(sideOptions.breakfast, usage.breakfastSide, meals, seasonPref.breakfastSide),
       pickComponent(sideOptions.breakfastSoup, usage.breakfastSoup, meals, seasonPref.breakfastSoup),
       kidsCount,
@@ -1296,13 +1461,12 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
     if (isWeekend) {
       const lunch = composeMeal(
         (() => {
-          const lunchMain = shouldInsertMonthlySpecial(day, daysInMonth, days, specialMonthlyMeal, "lunch")
-            ? lunchOptions.find((meal) => meal.name === specialMonthlyMeal)
-            : pickMeal(lunchOptions, usage.lunch, meals, previousDayType, "lunch", seasonPref.lunch);
-          if (lunchMain.name === specialMonthlyMeal) {
-            usage.lunch.set(lunchMain.name, (usage.lunch.get(lunchMain.name) || 0) + 1);
+          if (shouldInsertMonthlyCurry(day, daysInMonth, days, "lunch")) {
+            const curryMeal = lunchOptions.find((meal) => meal.name === "カレーランチ");
+            usage.lunch.set(curryMeal.name, (usage.lunch.get(curryMeal.name) || 0) + 1);
+            return curryMeal;
           }
-          return lunchMain;
+          return pickMeal(lunchOptions, usage.lunch, meals, days, previousDayType, "lunch", seasonPref.lunch);
         })(),
         pickComponent(sideOptions.lunch, usage.lunchSide, meals, seasonPref.lunchSide),
         pickComponent(sideOptions.lunchSoup, usage.lunchSoup, meals, seasonPref.lunchSoup),
@@ -1322,7 +1486,7 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
       );
       const manualBento = composePackedMeal(
         renameMeal(
-          pickMeal(bentoOptions.filter(isRiceBasedBentoMeal), usage.bento, meals, previousDayType, "", []),
+          pickMeal(bentoOptions.filter(isRiceBasedBentoMeal), usage.bento, meals, days, previousDayType, "", []),
           manualBentoName
         ),
         firstBentoSide,
@@ -1344,12 +1508,7 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
         estimatedItemCount: 1
       };
     } else {
-      const dinnerMain = shouldInsertMonthlySpecial(day, daysInMonth, days, specialMonthlyMeal, "dinner")
-        ? dinnerOptions.find((meal) => meal.name === specialMonthlyMeal)
-        : pickMeal(dinnerOptions, usage.dinner, meals, previousDayType, "dinner", seasonPref.dinner);
-      if (dinnerMain.name === specialMonthlyMeal) {
-        usage.dinner.set(dinnerMain.name, (usage.dinner.get(dinnerMain.name) || 0) + 1);
-      }
+      const dinnerMain = pickMeal(dinnerOptions, usage.dinner, meals, days, previousDayType, "dinner", seasonPref.dinner);
       dinner = composeMeal(
         dinnerMain,
         pickComponent(sideOptions.dinner, usage.dinnerSide, meals, seasonPref.dinnerSide),
@@ -1378,7 +1537,54 @@ function generateMonthlyPlan(year, month, bentoNames, kidsCount = 2, adultCount 
     week.range = `${week.start}日 - ${week.end}日`;
   });
 
-  return { year, month, season, kidsCount, adultCount, days, weeks, manualBentoDays: [...manualBentoDays], manualBentoName };
+  return {
+    year,
+    month,
+    season,
+    kidsCount,
+    adultCount,
+    days,
+    weeks,
+    fortnights: buildFortnightShoppingGroups(weeks),
+    manualBentoDays: [...manualBentoDays],
+    manualBentoName,
+    skipDays: [...skipDays],
+    skipDayName
+  };
+}
+
+function buildFortnightShoppingGroups(weeks) {
+  const fortnights = [];
+
+  for (let index = 0; index < weeks.length; index += 2) {
+    const blockWeeks = weeks.slice(index, index + 2);
+    if (blockWeeks.length === 0) {
+      continue;
+    }
+
+    const firstWeek = blockWeeks[0];
+    const lastWeek = blockWeeks[blockWeeks.length - 1];
+    const ingredients = {};
+
+    blockWeeks.forEach((week) => {
+      addIngredients(ingredients, week.ingredients);
+    });
+
+    fortnights.push({
+      label: blockWeeks.length === 1
+        ? firstWeek.label
+        : `${firstWeek.label}・${lastWeek.label}`,
+      shortLabel: blockWeeks.length === 1
+        ? `${firstWeek.label}分`
+        : `${firstWeek.label}〜${lastWeek.label}分`,
+      range: `${firstWeek.start}日 - ${lastWeek.end}日`,
+      ingredients,
+      estimatedCost: blockWeeks.reduce((total, week) => total + week.estimatedCost, 0),
+      estimatedItemCount: blockWeeks.reduce((total, week) => total + week.estimatedItemCount, 0)
+    });
+  }
+
+  return fortnights;
 }
 
 function composeMeal(mainMeal, sideDish, soupDish, kidsCount, adultCount) {
@@ -1399,6 +1605,8 @@ function composeMeal(mainMeal, sideDish, soupDish, kidsCount, adultCount) {
     ...mainMeal,
     dishes: [mainMeal.dishes[0], sideDish.name, soupDish.name],
     ingredients,
+    kidsCount,
+    adultCount,
     servingMultiplier,
     estimatedCost: estimate.total,
     estimatedItemCount: estimate.count
@@ -1423,6 +1631,8 @@ function composePackedMeal(mainMeal, sideDish, extraSideDish, kidsCount, adultCo
     ...mainMeal,
     dishes: [...mainMeal.dishes, sideDish.name, extraSideDish.name],
     ingredients,
+    kidsCount,
+    adultCount,
     servingMultiplier,
     estimatedCost: estimate.total,
     estimatedItemCount: estimate.count
@@ -1440,7 +1650,7 @@ function removeDuplicateCondimentIngredients(ingredients, condiments) {
 }
 
 function getServingMultiplier(kidsCount, adultCount) {
-  return ((kidsCount * 0.8) + adultCount) / 2;
+  return ((kidsCount * 0.8) + adultCount) / BASE_EQUIVALENT_ADULTS;
 }
 
 function isRiceBasedBentoMeal(meal) {
@@ -1473,9 +1683,10 @@ function getWeekendWeekKey(date) {
   return `${sunday.getFullYear()}-${sunday.getMonth() + 1}-${sunday.getDate()}`;
 }
 
-function pickMeal(options, usageMap, mealsSoFar, previousDayType = null, slotType = "", preferredNames = []) {
+function pickMeal(options, usageMap, mealsSoFar, existingDays = [], previousDayType = null, slotType = "", preferredNames = []) {
   const recentlyUsedNames = mealsSoFar.map((meal) => meal.name);
   const preferredSet = new Set(preferredNames);
+  const recentSlotMeals = getRecentSlotMeals(existingDays, slotType, 14);
   const ranked = options
     .filter((meal) => !isMonthlySpecialAlreadyUsed(meal.name, usageMap))
     .map((meal, index) => ({
@@ -1488,9 +1699,17 @@ function pickMeal(options, usageMap, mealsSoFar, previousDayType = null, slotTyp
       ) ? 1 : 0,
       sameNamePenalty: recentlyUsedNames.includes(meal.name) ? 1 : 0,
       previousDayPenalty: previousDayType && previousDayType[slotType] === meal.note ? 1 : 0,
-      seasonalPenalty: preferredSet.size > 0 && !preferredSet.has(meal.name) ? 1 : 0
+      seasonalPenalty: preferredSet.size > 0 && !preferredSet.has(meal.name) ? 1 : 0,
+      recentHistoryPenalty: getRecentMealPenalty(meal, recentSlotMeals),
+      overusePenalty: getOverusePenalty(meal, usageMap, slotType)
     }))
     .sort((a, b) => {
+      if (a.recentHistoryPenalty !== b.recentHistoryPenalty) {
+        return a.recentHistoryPenalty - b.recentHistoryPenalty;
+      }
+      if (a.overusePenalty !== b.overusePenalty) {
+        return a.overusePenalty - b.overusePenalty;
+      }
       if (a.count !== b.count) {
         return a.count - b.count;
       }
@@ -1515,6 +1734,57 @@ function pickMeal(options, usageMap, mealsSoFar, previousDayType = null, slotTyp
   const selected = ranked[0].meal;
   usageMap.set(selected.name, (usageMap.get(selected.name) || 0) + 1);
   return selected;
+}
+
+function getRecentSlotMeals(existingDays, slotType, lookbackDays) {
+  if (!slotType || !existingDays.length) {
+    return [];
+  }
+  return existingDays
+    .slice(-lookbackDays)
+    .map((day) => day.meals.find((meal) => meal.slot === getSlotLabel(slotType)))
+    .filter(Boolean);
+}
+
+function getSlotLabel(slotType) {
+  if (slotType === "lunch") {
+    return "昼";
+  }
+  if (slotType === "dinner") {
+    return "夜";
+  }
+  return "朝";
+}
+
+function getRecentMealPenalty(meal, recentSlotMeals) {
+  let penalty = 0;
+  recentSlotMeals.forEach((recentMeal, index) => {
+    const weight = recentSlotMeals.length - index;
+    if (recentMeal.name === meal.name) {
+      penalty += 10 + weight;
+    }
+    if (recentMeal.note === meal.note) {
+      penalty += 4;
+    }
+    if ((recentMeal.dishes || []).some((dish) => meal.dishes.includes(dish))) {
+      penalty += 6;
+    }
+  });
+  return penalty;
+}
+
+function getOverusePenalty(meal, usageMap, slotType) {
+  const count = usageMap.get(meal.name) || 0;
+  if (slotType === "dinner" && count >= 2) {
+    return 6 + (count - 2) * 3;
+  }
+  if (slotType === "lunch" && count >= 2) {
+    return 4 + (count - 2) * 2;
+  }
+  if (!slotType && count >= 3) {
+    return 3 + (count - 3) * 2;
+  }
+  return 0;
 }
 
 function pickComponent(options, usageMap, mealsSoFar, preferredNames = []) {
@@ -1557,27 +1827,82 @@ function mergeIngredientMaps(...sources) {
 }
 
 function scaleIngredientMap(source, kidsCount, adultCount) {
-  const totalEquivalentAdults = (kidsCount * 0.8) + adultCount;
-  const multiplier = totalEquivalentAdults / 2;
+  const multiplier = getServingMultiplier(kidsCount, adultCount);
   const scaled = {};
   Object.entries(source).forEach(([name, quantity]) => {
-    scaled[name] = scaleQuantity(quantity, multiplier);
+    scaled[name] = scaleQuantity(quantity, multiplier, name);
   });
   return scaled;
 }
 
-function scaleQuantity(quantity, multiplier) {
-  const match = quantity.match(/^(\d+(?:\.\d+)?)(.*)$/);
+function scaleQuantity(quantity, multiplier, ingredientName = "") {
+  if (isApproximateQuantity(quantity)) {
+    return scaleApproximateQuantity(quantity, multiplier, ingredientName);
+  }
+
+  const normalizedQuantity = normalizeQuantityText(quantity);
+  const match = normalizedQuantity.match(/^(\d+(?:\.\d+)?)(.*)$/);
   if (!match) {
     return quantity;
   }
 
   const scaledValue = Number(match[1]) * multiplier;
-  return `${trimNumber(scaledValue)}${match[2]}`;
+  const unit = normalizeUnitLabel(match[2]);
+  const roundedValue = roundScaledValue(scaledValue, unit);
+  return `${trimNumber(roundedValue)}${unit}`;
+}
+
+function scaleApproximateQuantity(quantity, multiplier, ingredientName = "") {
+  if (quantity === "適量") {
+    if (multiplier <= 1.5) {
+      return "適量";
+    }
+    if (multiplier <= 3) {
+      return "やや多め";
+    }
+    return `味を見ながら ${trimNumber(roundScaledValue(multiplier * 0.25, "小さじ"))}小さじ程度`;
+  }
+
+  const scaledTeaspoons = roundScaledValue(0.125 * multiplier, "小さじ");
+  if (scaledTeaspoons <= 0.25) {
+    return quantity;
+  }
+  return `${trimNumber(scaledTeaspoons)}小さじ`;
+}
+
+function roundScaledValue(value, unit) {
+  if (!Number.isFinite(value)) {
+    return value;
+  }
+
+  if (["袋", "パック", "箱", "個", "枚", "本", "切れ", "株", "缶", "瓶", "片"].includes(unit)) {
+    return Math.max(1, Math.ceil(value));
+  }
+
+  if (["玉", "丁", "合", "斤", "束", "食分", "皿分", "小さじ"].includes(unit)) {
+    return roundToStep(value, 0.5);
+  }
+
+  if (["g", "ml", "cm"].includes(unit)) {
+    return roundToStep(value, 1);
+  }
+
+  if (unit === "L") {
+    return roundToStep(value, 0.1);
+  }
+
+  return roundToStep(value, 0.1);
+}
+
+function roundToStep(value, step) {
+  if (!Number.isFinite(value) || !step) {
+    return value;
+  }
+  return Math.max(step, Math.ceil(value / step) * step);
 }
 
 function isMonthlySpecialAlreadyUsed(mealName, usageMap) {
-  if (mealName !== "カレーランチ" && mealName !== "クリームシチュー献立") {
+  if (mealName !== "カレーランチ") {
     return false;
   }
   return (usageMap.get(mealName) || 0) >= 1;
@@ -1805,6 +2130,16 @@ function parseManualBentoDays(input, year, month) {
   )].sort((a, b) => a - b);
 }
 
+function parseFlexibleMonthDays(input, year, month) {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  return [...new Set(
+    String(input || "")
+      .split(/[,\s、]+/)
+      .map((value) => Number(value.trim()))
+      .filter((value) => Number.isInteger(value) && value >= 1 && value <= daysInMonth)
+  )].sort((a, b) => a - b);
+}
+
 function parseScheduledBentoDays(input, year, month) {
   const daysInMonth = new Date(year, month, 0).getDate();
   return [...new Set(
@@ -1828,6 +2163,15 @@ function createManualBentoMeal(name, kidsCount, adultCount) {
   return createMeal(name, "持参するお弁当", ["お弁当を準備"], {});
 }
 
+function createSkipDayMeal(name) {
+  return {
+    ...createMeal(name, "献立を作らない日", ["食事の用意なし"], {}),
+    slot: "休み",
+    estimatedCost: 0,
+    estimatedItemCount: 0
+  };
+}
+
 function pickScheduledBentoName(day, bentoNames) {
   const scheduleEntries = Object.entries(bentoNames.schedule || {});
   const matched = scheduleEntries.find(([, days]) => Array.isArray(days) && days.includes(day));
@@ -1844,6 +2188,12 @@ function renameMeal(meal, name) {
 
 function formatCurrency(value) {
   return `約${Math.round(value).toLocaleString("ja-JP")}円`;
+}
+
+function formatServingGuide(kidsCount, adultCount) {
+  const equivalentAdults = (kidsCount * 0.8) + adultCount;
+  const multiplier = getServingMultiplier(kidsCount, adultCount);
+  return `子ども${kidsCount}人・大人${adultCount}人（大人${trimNumber(equivalentAdults)}人分相当、基準比 ${trimNumber(multiplier)}倍）`;
 }
 
 function getSeason(month) {
@@ -1872,6 +2222,9 @@ function renderSummary(plan, bentoNames, manualBentoConfig) {
   const manualBentoCount = plan.days.filter((day) => day.meals.some((meal) =>
     meal.name === (manualBentoConfig.name || "持っていくお弁当")
   )).length;
+  const skipDayCount = plan.days.filter((day) => day.meals.some((meal) =>
+    meal.name === (manualBentoConfig.skipDayName || "お休みの日")
+  )).length;
   const monthlyEstimate = plan.weeks.reduce((total, week) => total + week.estimatedCost, 0);
   const seasonLabel = {
     spring: "春",
@@ -1879,9 +2232,10 @@ function renderSummary(plan, bentoNames, manualBentoConfig) {
     autumn: "秋",
     winter: "冬"
   }[plan.season];
+  const servingGuide = formatServingGuide(plan.kidsCount, plan.adultCount);
 
   document.getElementById("summary-text").textContent =
-    `${plan.year}年${plan.month}月は 子ども${plan.kidsCount}人・大人${plan.adultCount}人の${seasonLabel}向けで ${plan.days.length}日分の献立を作成しました。土日 ${weekends}日、${bentoNames.tomari} は ${tomariCount}回で ${formatCurrency(tomariCost)}、${bentoNames.sosodo} は ${sosodoCount}回で ${formatCurrency(sosodoCost)}、${bentoNames.shima} は ${shimaCount}回、購入弁当は合計 ${bentoCount}回、指定したお弁当日は ${manualBentoCount}日、月の食費目安は ${formatCurrency(monthlyEstimate)} です。`;
+    `${plan.year}年${plan.month}月は ${servingGuide} の${seasonLabel}向けで ${plan.days.length}日分の献立を作成しました。土日 ${weekends}日、${bentoNames.tomari} は ${tomariCount}回で ${formatCurrency(tomariCost)}、${bentoNames.sosodo} は ${sosodoCount}回で ${formatCurrency(sosodoCost)}、${bentoNames.shima} は ${shimaCount}回、購入弁当は合計 ${bentoCount}回、指定したお弁当日は ${manualBentoCount}日、作らない日は ${skipDayCount}日、月の食費目安は ${formatCurrency(monthlyEstimate)} です。`;
 }
 
 function renderMonthlyMenu(days) {
@@ -1936,13 +2290,13 @@ function renderWeeklyShopping(weeks) {
           </div>
           <div class="week-actions">
             <div class="week-cost">
-              <div class="week-cost-label">買い物の目安</div>
+              <div class="week-cost-label">2週間分の目安</div>
               <div class="week-cost-value">${formatCurrency(week.estimatedCost)}</div>
             </div>
-            <button type="button" class="print-button week-shopping-print-button" data-week-label="${week.label}">この週の買い物</button>
+            <button type="button" class="print-button week-shopping-print-button" data-week-label="${week.label}">${week.shortLabel}を印刷</button>
           </div>
         </div>
-        <div class="week-cost-note">単価を設定できた ${week.estimatedItemCount} 品目からの概算です。地域や時期で前後します。</div>
+        <div class="week-cost-note">単価を設定できた ${week.estimatedItemCount} 品目からの2週間分概算です。地域や時期で前後します。</div>
         <div class="ingredients">${items}</div>
       </article>
     `);
@@ -2015,26 +2369,21 @@ function pickBentoName(date, bentoNames) {
   return weekIndex % 2 === 1 ? bentoNames.tomari : bentoNames.sosodo;
 }
 
-function pickMonthlySpecial(year, month) {
-  return (year + month) % 2 === 0 ? "カレーランチ" : "クリームシチュー献立";
-}
-
-function shouldInsertMonthlySpecial(day, daysInMonth, existingDays, specialMealName, slotType) {
-  const alreadyInserted = existingDays.some((plannedDay) => plannedDay.meals.some((meal) => meal.name === specialMealName));
-  if (alreadyInserted) {
+function shouldInsertMonthlyCurry(day, daysInMonth, existingDays, slotType) {
+  if (slotType !== "lunch") {
     return false;
   }
 
-  if (slotType === "lunch" && specialMealName !== "カレーランチ") {
+  const previousCurryDays = existingDays
+    .filter((plannedDay) => plannedDay.meals.some((meal) => meal.name === "カレーランチ"))
+    .map((plannedDay) => plannedDay.day);
+  const lastCurryDay = previousCurryDays[previousCurryDays.length - 1];
+  if (lastCurryDay && day - lastCurryDay < 14) {
     return false;
   }
 
-  if (slotType === "dinner" && specialMealName !== "クリームシチュー献立") {
-    return false;
-  }
-
-  const preferredDay = Math.max(3, Math.floor(daysInMonth * 0.4));
-  return day >= preferredDay;
+  const targetDay = Math.max(6, Math.min(daysInMonth - 14, 7));
+  return day >= targetDay;
 }
 
 function printSection(section) {
@@ -2111,7 +2460,7 @@ function openRecipeDialog(meal) {
   const dialog = document.getElementById("recipe-dialog");
   const recipes = getRecipesForMeal(meal);
   document.getElementById("recipe-title").textContent = meal.name;
-  document.getElementById("recipe-subtitle").textContent = `${meal.slot}ごはんの作り方`;
+  document.getElementById("recipe-subtitle").textContent = `${meal.slot}ごはんの作り方 / ${formatServingGuide(meal.kidsCount || BASE_SERVING_COUNTS.kids, meal.adultCount || BASE_SERVING_COUNTS.adults)}`;
   document.getElementById("recipe-ingredients").innerHTML = Object.entries(meal.ingredients)
     .map(([name, quantity]) => `<div class="recipe-ingredient-item"><span>${name}</span><span>${quantity}</span></div>`)
     .join("");
@@ -2172,18 +2521,20 @@ function getRecipesForMeal(meal) {
 }
 
 function getRecipeForDish(dish, meal) {
+  const condimentOverride = getCondimentProfileForDish(dish, meal);
+
   if (fullRecipeCatalog[dish]) {
     return {
       title: dish,
       steps: fullRecipeCatalog[dish].steps,
-      condiments: normalizeCondiments(fullRecipeCatalog[dish].condiments)
+      condiments: condimentOverride || normalizeCondiments(fullRecipeCatalog[dish].condiments)
     };
   }
 
   if (dish.includes("丼")) {
     return {
       title: dish,
-      condiments: normalizeCondiments(["醤油", "みりん", "砂糖"]),
+      condiments: condimentOverride,
       steps: [
         "具材を食べやすく切って火を通す。",
         "味付けして汁気を整える。",
@@ -2192,10 +2543,22 @@ function getRecipeForDish(dish, meal) {
     };
   }
 
-  if (dish.includes("うどん") || dish.includes("そば") || dish.includes("パスタ")) {
+  if (dish.includes("うどん") || dish.includes("そば")) {
     return {
       title: dish,
-      condiments: normalizeCondiments(["塩", "こしょう", "コンソメ"]),
+      condiments: condimentOverride,
+      steps: [
+        "麺を表示通りにゆでる。",
+        "つゆを温めて具材を用意する。",
+        "麺とつゆを合わせて盛り付ける。"
+      ]
+    };
+  }
+
+  if (dish.includes("パスタ")) {
+    return {
+      title: dish,
+      condiments: condimentOverride,
       steps: [
         "麺を表示通りにゆでる。",
         "具材やソースを別に用意して温める。",
@@ -2206,7 +2569,7 @@ function getRecipeForDish(dish, meal) {
 
   return {
     title: dish,
-    condiments: normalizeCondiments(getFallbackCondiments(meal, dish)),
+    condiments: condimentOverride,
     steps: [
       "材料を食べやすく切って用意する。",
       "フライパンや鍋で火を通しながら味を整える。",
@@ -2215,32 +2578,130 @@ function getRecipeForDish(dish, meal) {
   };
 }
 
+function getCondimentProfileForDish(dish, meal) {
+  if (dish.includes("味噌汁")) {
+    return buildCondimentMap({
+      "和風だし": "600ml",
+      "味噌": "36g"
+    });
+  }
+
+  if (dish.includes("スープ")) {
+    if (dish.includes("中華") || dish.includes("卵") || dish.includes("わかめ")) {
+      return buildCondimentMap({
+        "鶏がらスープの素": "2食分",
+        "塩": "1g",
+        "こしょう": "1g",
+        "ごま油": "5ml"
+      });
+    }
+    return buildCondimentMap({
+      "コンソメ": "2個",
+      "塩": "1g",
+      "こしょう": "1g"
+    });
+  }
+
+  if (dish.includes("丼")) {
+    return buildCondimentMap({
+      "醤油": "18ml",
+      "みりん": "18ml",
+      "砂糖": "6g",
+      "和風だし": "120ml"
+    });
+  }
+
+  if (dish.includes("うどん") || dish.includes("そば")) {
+    return buildCondimentMap({
+      "めんつゆ": "180ml",
+      "醤油": "5ml",
+      "みりん": "5ml"
+    });
+  }
+
+  if (dish.includes("パスタ")) {
+    return buildCondimentMap({
+      "塩": "3g",
+      "こしょう": "1g",
+      "オリーブオイル": "10ml"
+    });
+  }
+
+  return normalizeCondiments(getFallbackCondiments(meal, dish));
+}
+
 function getFallbackCondiments(meal, primaryDish) {
   if (primaryDish.includes("味噌汁")) {
-    return ["味噌", "だし"];
+    return {
+      "和風だし": "600ml",
+      "味噌": "36g"
+    };
   }
   if (primaryDish.includes("スープ")) {
-    return ["コンソメ または 鶏がらスープの素", "塩", "こしょう"];
+    if (primaryDish.includes("中華") || primaryDish.includes("卵")) {
+      return {
+        "鶏がらスープの素": "2食分",
+        "塩": "1g",
+        "こしょう": "1g",
+        "ごま油": "5ml"
+      };
+    }
+    return {
+      "コンソメ": "2個",
+      "塩": "1g",
+      "こしょう": "1g"
+    };
   }
   if (primaryDish.includes("焼き") || primaryDish.includes("炒め")) {
-    return ["塩", "こしょう", "醤油"];
+    return {
+      "塩": "2g",
+      "こしょう": "1g",
+      "醤油": "10ml"
+    };
   }
-  if (primaryDish.includes("鍋") || primaryDish.includes("スープ")) {
-    return ["だし", "塩", "醤油"];
+  if (primaryDish.includes("鍋")) {
+    return {
+      "和風だし": "700ml",
+      "塩": "2g",
+      "醤油": "15ml"
+    };
   }
   if (primaryDish.includes("揚げ") || primaryDish.includes("フライ") || primaryDish.includes("コロッケ")) {
-    return ["塩", "中濃ソース"];
+    return {
+      "塩": "1g",
+      "中濃ソース": "15ml"
+    };
   }
   if (meal.note.includes("パン") || meal.note.includes("朝食")) {
-    return ["塩", "こしょう", "バター"];
+    return {
+      "塩": "1g",
+      "こしょう": "1g",
+      "バター": "10g"
+    };
   }
-  return ["塩", "こしょう", "醤油"];
+  return {
+    "塩": "2g",
+    "こしょう": "1g",
+    "醤油": "10ml"
+  };
 }
 
 function normalizeCondiments(condiments) {
+  if (condiments && !Array.isArray(condiments) && typeof condiments === "object") {
+    return buildCondimentMap(condiments);
+  }
+
   return (condiments || []).reduce((accumulator, name) => {
     const normalizedName = condimentAliasGuide[name] || name;
     const quantity = condimentAmountGuide[normalizedName] || "少々";
+    accumulator[normalizedName] = mergeQuantity(accumulator[normalizedName], quantity);
+    return accumulator;
+  }, {});
+}
+
+function buildCondimentMap(source) {
+  return Object.entries(source || {}).reduce((accumulator, [name, quantity]) => {
+    const normalizedName = condimentAliasGuide[name] || name;
     accumulator[normalizedName] = mergeQuantity(accumulator[normalizedName], quantity);
     return accumulator;
   }, {});
@@ -2272,9 +2733,13 @@ if (typeof module !== "undefined") {
   module.exports = {
     generateMonthlyPlan,
     mergeQuantity,
+    scaleQuantity,
+    getServingMultiplier,
+    getRecipeForDish,
     shouldUseBento,
     estimateIngredientCost,
     estimateBentoCost,
-    parseManualBentoDays
+    parseManualBentoDays,
+    parseFlexibleMonthDays
   };
 }

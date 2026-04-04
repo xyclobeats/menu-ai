@@ -578,6 +578,7 @@ h1 {
   }
 
   .hero,
+  .controls,
   .summary,
   .print-button,
   .recipe-button,
@@ -751,7 +752,7 @@ h1 {
   }
 
   body.print-shopping-week .panel:last-child .panel-head {
-    margin-bottom: 3mm;
+    margin-bottom: 2mm;
   }
 
   body.print-shopping-week .week-card {
@@ -763,16 +764,16 @@ h1 {
 
   body.print-shopping-week .week-head {
     gap: 2mm;
-    margin-bottom: 2mm;
+    margin-bottom: 1.5mm;
   }
 
   body.print-shopping-week .week-head h3 {
-    margin-bottom: 0.8mm;
-    font-size: 11pt;
+    margin-bottom: 0.4mm;
+    font-size: 10pt;
   }
 
   body.print-shopping-week .week-range {
-    font-size: 7pt;
+    font-size: 6pt;
   }
 
   body.print-shopping-week .week-actions {
@@ -783,49 +784,49 @@ h1 {
   body.print-shopping-week .week-cost {
     min-width: 0;
     width: auto;
-    padding: 1.5mm 2mm;
+    padding: 1mm 1.5mm;
     border-radius: 0;
     border: 1px solid var(--line);
     background: #fff;
   }
 
   body.print-shopping-week .week-cost-label {
-    font-size: 6pt;
+    font-size: 5.5pt;
   }
 
   body.print-shopping-week .week-cost-value {
-    margin-top: 0.5mm;
-    font-size: 9pt;
+    margin-top: 0.2mm;
+    font-size: 8pt;
   }
 
   body.print-shopping-week .week-cost-note {
     margin-top: 0;
-    margin-bottom: 2mm;
-    font-size: 6pt;
+    margin-bottom: 1.5mm;
+    font-size: 5.5pt;
     line-height: 1.2;
   }
 
   body.print-shopping-week .ingredients {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.5mm;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1mm;
     margin-top: 0;
   }
 
   body.print-shopping-week .ingredient-item {
-    padding: 1.5mm 2mm;
+    padding: 1mm 1.2mm;
     border-radius: 0;
     border: 1px solid var(--line);
     background: #fff;
   }
 
   body.print-shopping-week .ingredient-name {
-    font-size: 7pt;
+    font-size: 6pt;
     line-height: 1.1;
   }
 
   body.print-shopping-week .ingredient-qty {
-    margin-top: 0.5mm;
-    font-size: 6pt;
+    margin-top: 0.3mm;
+    font-size: 5.5pt;
     line-height: 1.1;
   }
 }

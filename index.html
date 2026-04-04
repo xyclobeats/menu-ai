@@ -12,7 +12,7 @@
       <div class="hero-copy">
         <p class="eyebrow">Monthly Menu Planner</p>
         <h1>献立AI</h1>
-        <p class="lead">平日は朝と夜、土日は3食。月間の献立と週ごとの買い物リストをまとめて作ります。</p>
+        <p class="lead">平日は朝と夜、土日は3食。月間の献立、作り方、2週間ごとの買い物リストを家族人数に合わせてまとめて作ります。</p>
       </div>
     </section>
 
@@ -111,6 +111,23 @@
         </div>
       </section>
 
+      <section class="form-section">
+        <div class="form-section-head">
+          <p class="section-kicker">Skip Days</p>
+          <h3>作らない日</h3>
+        </div>
+        <div class="form-grid form-grid-compact">
+          <label>
+            献立を作らない日
+            <input id="skip-days" type="text" placeholder="例: 8, 15, 23">
+          </label>
+          <label>
+            表示名
+            <input id="skip-day-name" type="text" value="お休みの日">
+          </label>
+        </div>
+      </section>
+
       <div class="form-actions">
         <button type="submit">献立を作る</button>
       </div>
@@ -124,13 +141,14 @@
           <li>土日: 朝ごはん、昼ごはん、夕ごはん</li>
           <li>とまり / そそど / 島ばあちゃん のお弁当日は日付指定で入れられる</li>
           <li>指定した平日は「お弁当の日」として反映できる</li>
-          <li>1週間ごとに必要食材を集計する</li>
-          <li>週ごとの買い物金額の目安も表示する</li>
+          <li>分量の計算基準は「子ども2人・大人1人」</li>
+          <li>人数変更時は個数を切り上げ、半玉などは0.5刻みで換算する</li>
+          <li>2週間ごとに必要食材と買い物金額の目安を集計する</li>
         </ul>
       </div>
       <div class="card">
         <h2>出力</h2>
-        <p id="summary-text">年と月を選んで「献立を作る」を押してください。週間の食材リストに概算金額も表示されます。</p>
+        <p id="summary-text">年と月を選んで「献立を作る」を押してください。人数換算した材料と、2週間分の食材リストの概算金額を表示します。</p>
       </div>
     </section>
 
@@ -138,13 +156,13 @@
       <div class="panel">
         <div class="panel-head">
           <h2>月間メニュー</h2>
-          <button type="button" id="print-all" class="print-button">2週間メニューを印刷</button>
+          <button type="button" id="print-all" class="print-button">月間メニューを印刷</button>
         </div>
         <div id="monthly-menu" class="monthly-menu"></div>
       </div>
       <div class="panel">
         <div class="panel-head">
-          <h2>週間の食材リスト</h2>
+          <h2>2週間の食材リスト</h2>
         </div>
         <div id="weekly-shopping" class="weekly-shopping"></div>
       </div>
